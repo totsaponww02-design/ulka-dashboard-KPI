@@ -361,11 +361,15 @@
             const staffScores = useMemo(() => {
                 return STAFF.map(person => {
                     let totalPoints = 0;
+                    let totalMachines = 0;
                     const personRecords = records[person.id] || {};
                     
                     Object.entries(personRecords).forEach(([modelId, count]) => {
                         const model = MODELS.find(m => m.id === modelId);
-                        if (model) totalPoints += count * model.points;
+                        if (model) {
+                            totalPoints += count * model.points;
+                            totalMachines += count;
+                        }
                     });
 
                     totalPoints += (extraPoints[person.id] || 0);
@@ -377,6 +381,7 @@
                     return {
                         ...person,
                         totalPoints,
+                        totalMachines,
                         autoDays,
                         activeDays,
                         missingPoints: Math.max(0, person.kpi - totalPoints),
@@ -614,7 +619,10 @@
                                                     </div>
                                                     <div>
                                                         <h3 className="font-bold text-slate-800 text-lg group-hover:text-indigo-600 transition-colors">{staff.name}</h3>
-                                                        <p className="text-xs font-medium text-slate-500">{staff.role}</p>
+                                                        <p className="text-xs font-medium text-slate-500">
+                                                            {staff.role} <span className="mx-1 text-slate-300">|</span> 
+                                                            รวม <strong className={statusText}>{staff.totalMachines}</strong> เครื่อง
+                                                        </p>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
@@ -743,14 +751,28 @@
                                                                     )}
                                                                 </td>
                                                             );
-                                                        })}
-                                                    </tr>
+                                                    })}
+                                                </tr>
+                                            ))}
+                                            
+                                            {/* แถวสรุปจำนวนเครื่องทั้งหมด */}
+                                            <tr className="bg-slate-50 border-t-2 border-slate-200">
+                                                <td colSpan="2" className="px-6 py-4 font-bold text-slate-700">
+                                                    <div className="flex items-center gap-2">
+                                                        <WrenchIcon className="w-4 h-4 text-slate-400" /> ยอดรวมจำนวนเครื่อง (เครื่อง)
+                                                    </div>
+                                                </td>
+                                                {staffScores.map(staff => (
+                                                    <td key={staff.id} className="px-6 py-4 text-center font-bold text-slate-700 text-base">
+                                                        {staff.totalMachines}
+                                                    </td>
                                                 ))}
-                                                
-                                                {/* แถวคะแนนเสริม */}
-                                                <tr className="bg-amber-50/30 hover:bg-amber-50/60 transition-colors">
-                                                    <td colSpan="2" className="px-6 py-4 font-semibold text-amber-800">
-                                                        <div className="flex items-center gap-2">
+                                            </tr>
+
+                                            {/* แถวคะแนนเสริม */}
+                                            <tr className="bg-amber-50/30 hover:bg-amber-50/60 transition-colors">
+                                                <td colSpan="2" className="px-6 py-4 font-semibold text-amber-800">
+                                                    <div className="flex items-center gap-2">
                                                             <StarIcon className="w-4 h-4 text-amber-500" /> คะแนนงานเสริม
                                                         </div>
                                                     </td>
