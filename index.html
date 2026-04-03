@@ -75,11 +75,12 @@
         const TrophyIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>;
         const UserIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
         const AlertCircleIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>;
-        const CalendarClockIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.25V14"/><path d="M22 16a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z"/></svg>;
         const StarIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
         const CheckCircleIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
         const DownloadIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>;
         const HistoryIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>;
+        const ListIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>;
+        const ActivityIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>;
 
         // --- ข้อมูลโมเดลและคะแนน ---
         const MODELS = [
@@ -204,7 +205,8 @@
                         pman: {}
                     },
                     extraPoints: { nakrob: 0, amin: 0, guy: 0, pman: 0 },
-                    customDaysLeft: {} // เก็บค่าที่ถูกแก้ไข manual
+                    customDaysLeft: {},
+                    logs: [] // เพิ่มระบบเก็บประวัติรายวัน
                 }
             };
         };
@@ -212,11 +214,15 @@
         function App() {
             const [db, setDb] = useState(getInitialDatabase);
             const [currentMonth, setCurrentMonth] = useState('2026-04'); 
+            
+            // Tab State: 'summary' or 'history'
+            const [activeTab, setActiveTab] = useState('summary');
 
-            const currentMonthData = db[currentMonth] || { records: {}, extraPoints: {}, customDaysLeft: {} };
+            const currentMonthData = db[currentMonth] || { records: {}, extraPoints: {}, customDaysLeft: {}, logs: [] };
             const records = currentMonthData.records || {};
             const extraPoints = currentMonthData.extraPoints || {};
             const customDaysLeft = currentMonthData.customDaysLeft || {};
+            const logs = currentMonthData.logs || [];
 
             const [selectedStaff, setSelectedStaff] = useState(STAFF[0].id);
             const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
@@ -234,7 +240,7 @@
 
             const updateCurrentMonthData = (updaterFn) => {
                 setDb(prevDb => {
-                    const oldData = prevDb[currentMonth] || { records: {}, extraPoints: {}, customDaysLeft: {} };
+                    const oldData = prevDb[currentMonth] || { records: {}, extraPoints: {}, customDaysLeft: {}, logs: [] };
                     return {
                         ...prevDb,
                         [currentMonth]: updaterFn(oldData)
@@ -242,6 +248,7 @@
                 });
             };
 
+            // บันทึกเครื่อง พร้อมเก็บ Log
             const handleUpdateRecord = (isAdding) => {
                 const amount = isAdding ? Number(quantity) : -Number(quantity);
                 if (amount === 0 || isNaN(amount)) return;
@@ -251,6 +258,21 @@
                     const staffRecords = safeRecords[selectedStaff] || {};
                     const currentCount = staffRecords[selectedModel] || 0;
                     const newCount = Math.max(0, currentCount + amount); 
+                    
+                    // คำนวณจำนวนที่เปลี่ยนไปจริงๆ (ป้องกันกรณีลบเกินจำนวนที่มีอยู่)
+                    const actualAmount = newCount - currentCount;
+                    if (actualAmount === 0) return prevData;
+
+                    // สร้าง Log ย่อย
+                    const newLog = {
+                        id: Date.now() + Math.random().toString(36).substring(2, 5),
+                        timestamp: new Date().toISOString(),
+                        type: 'model',
+                        staffId: selectedStaff,
+                        modelId: selectedModel,
+                        amount: actualAmount
+                    };
+
                     return {
                         ...prevData,
                         records: {
@@ -259,7 +281,8 @@
                                 ...staffRecords,
                                 [selectedModel]: newCount
                             }
-                        }
+                        },
+                        logs: [newLog, ...(prevData.logs || [])] // เอาใหม่ล่าสุดไว้บน
                     };
                 });
                 
@@ -268,18 +291,29 @@
                 setQuantity(1); 
             };
 
+            // บันทึกคะแนนเสริม พร้อมเก็บ Log
             const handleAddExtraPoints = () => {
                 const points = Number(extraPointInput);
                 if (isNaN(points)) return;
 
                 updateCurrentMonthData(prevData => {
                     const currentExtra = prevData.extraPoints || {};
+                    
+                    const newLog = {
+                        id: Date.now() + Math.random().toString(36).substring(2, 5),
+                        timestamp: new Date().toISOString(),
+                        type: 'extra',
+                        staffId: selectedStaffExtra,
+                        points: points
+                    };
+
                     return {
                         ...prevData,
                         extraPoints: {
                             ...currentExtra,
                             [selectedStaffExtra]: (currentExtra[selectedStaffExtra] || 0) + points
-                        }
+                        },
+                        logs: [newLog, ...(prevData.logs || [])]
                     };
                 });
 
@@ -292,7 +326,7 @@
                 updateCurrentMonthData(prevData => {
                     const newCustom = { ...(prevData.customDaysLeft || {}) };
                     if (val === '') {
-                        delete newCustom[staffId]; // ถ้าลบช่องทิ้ง ให้กลับไปใช้ค่าออโต้
+                        delete newCustom[staffId]; 
                     } else {
                         newCustom[staffId] = Number(val);
                     }
@@ -301,22 +335,29 @@
             };
 
             const handleDownloadPDF = () => {
-                setIsDownloading(true);
-                const element = document.getElementById('printable-area');
+                // บังคับเปลี่ยนแท็บเป็นตารางสรุปก่อนปรินต์
+                setActiveTab('summary');
                 
-                const opt = {
-                    margin:       [0.5, 0.5, 0.5, 0.5], 
-                    filename:     `สรุปคะแนนทีมโมดิฟายด์_${currentMonth}.pdf`,
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
-                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
-                };
+                // รอให้ UI render เสร็จนิดนึงก่อนปรินต์
+                setTimeout(() => {
+                    setIsDownloading(true);
+                    const element = document.getElementById('printable-area');
+                    
+                    const opt = {
+                        margin:       [0.5, 0.5, 0.5, 0.5], 
+                        filename:     `สรุปคะแนนทีมโมดิฟายด์_${currentMonth}.pdf`,
+                        image:        { type: 'jpeg', quality: 0.98 },
+                        html2canvas:  { scale: 2, useCORS: true },
+                        jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+                    };
 
-                html2pdf().set(opt).from(element).save().then(() => {
-                    setIsDownloading(false);
-                });
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        setIsDownloading(false);
+                    });
+                }, 100);
             };
 
+            // คำนวณคะแนนปัจจุบันของแต่ละคน
             const staffScores = useMemo(() => {
                 return STAFF.map(person => {
                     let totalPoints = 0;
@@ -329,11 +370,8 @@
 
                     totalPoints += (extraPoints[person.id] || 0);
 
-                    // คำนวณวันทำงานออโต้
                     const autoDays = calculateAutoDaysLeft(currentMonth, person);
-                    // ใช้วันทำงานที่ผู้ใช้แก้ (ถ้ามี) ถ้าไม่มีใช้ออโต้
                     const activeDays = customDaysLeft[person.id] !== undefined ? customDaysLeft[person.id] : autoDays;
-                    
                     const daysToDivide = activeDays > 0 ? activeDays : 1; 
 
                     return {
@@ -346,6 +384,21 @@
                     };
                 });
             }, [records, extraPoints, currentMonth, customDaysLeft]);
+
+            // จัดกลุ่ม Logs ตามวันที่
+            const groupedLogs = useMemo(() => {
+                const groups = {};
+                logs.forEach(log => {
+                    const dateObj = new Date(log.timestamp);
+                    const dateStr = dateObj.toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    
+                    if (!groups[dateStr]) {
+                        groups[dateStr] = [];
+                    }
+                    groups[dateStr].push(log);
+                });
+                return groups;
+            }, [logs]);
 
             return (
                 <div className="min-h-screen bg-slate-50 p-4 md:p-8 pb-20">
@@ -627,80 +680,172 @@
                                 })}
                             </div>
 
-                            {/* Data Table */}
-                            <div className="bg-white rounded-3xl shadow-sm border border-slate-200/60 overflow-hidden flex flex-col">
-                                <div className="px-6 py-5 border-b border-slate-100 bg-white flex justify-between items-center">
-                                    <h2 className="font-bold text-lg text-slate-800 flex items-center gap-2">
+                            {/* Data Table / History Tab Control */}
+                            <div className="bg-white rounded-3xl shadow-sm border border-slate-200/60 overflow-hidden flex flex-col print-force-summary">
+                                
+                                {/* แถบเลือกโหมด (ซ่อนตอนปรินต์) */}
+                                <div className="px-4 py-4 border-b border-slate-100 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <h2 className="font-bold text-lg text-slate-800 flex items-center gap-2 ml-2">
                                         <TrophyIcon className="w-5 h-5 text-indigo-500" />
-                                        ตารางสรุปผลงาน
+                                        {activeTab === 'summary' ? 'ตารางสรุปผลงาน' : 'ประวัติการบันทึกรายวัน'}
                                     </h2>
+                                    <div className="flex bg-slate-100 p-1 rounded-xl print:hidden">
+                                        <button 
+                                            onClick={() => setActiveTab('summary')}
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'summary' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                        >
+                                            <ListIcon className="w-4 h-4" /> สรุปยอด
+                                        </button>
+                                        <button 
+                                            onClick={() => setActiveTab('history')}
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'history' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                        >
+                                            <ActivityIcon className="w-4 h-4" /> ประวัติรายวัน
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-sm text-left whitespace-nowrap">
-                                        <thead className="text-xs text-slate-500 font-semibold bg-slate-50/80 border-b border-slate-200">
-                                            <tr>
-                                                <th className="px-6 py-4 rounded-tl-lg">รุ่นเครื่อง</th>
-                                                <th className="px-6 py-4 text-center">คะแนน/เครื่อง</th>
-                                                {STAFF.map(s => (
-                                                    <th key={s.id} className="px-6 py-4 text-center">{s.name}</th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-100">
-                                            {MODELS.filter(m => 
-                                                STAFF.some(s => (records[s.id]?.[m.id] || 0) > 0)
-                                            ).map((model) => (
-                                                <tr key={model.id} className="hover:bg-slate-50/60 transition-colors">
-                                                    <td className="px-6 py-3.5 font-medium text-slate-700">
-                                                        {model.name}
-                                                    </td>
-                                                    <td className="px-6 py-3.5 text-center text-slate-500">
-                                                        {model.points}
-                                                    </td>
-                                                    {STAFF.map(staff => {
-                                                        const count = records[staff.id]?.[model.id] || 0;
-                                                        return (
-                                                            <td key={staff.id} className="px-6 py-3.5 text-center">
-                                                                {count > 0 ? (
-                                                                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-50 text-indigo-700 font-bold text-sm">
-                                                                        {count}
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="text-slate-300">-</span>
-                                                                )}
-                                                            </td>
-                                                        );
-                                                    })}
-                                                </tr>
-                                            ))}
-                                            
-                                            {/* แถวคะแนนเสริม */}
-                                            <tr className="bg-amber-50/30 hover:bg-amber-50/60 transition-colors">
-                                                <td colSpan="2" className="px-6 py-4 font-semibold text-amber-800">
-                                                    <div className="flex items-center gap-2">
-                                                        <StarIcon className="w-4 h-4 text-amber-500" /> คะแนนงานเสริม
-                                                    </div>
-                                                </td>
-                                                {STAFF.map(staff => (
-                                                    <td key={staff.id} className="px-6 py-4 text-center font-bold text-amber-600">
-                                                        {extraPoints[staff.id] !== 0 ? (extraPoints[staff.id] > 0 ? `+${extraPoints[staff.id]}` : extraPoints[staff.id]) : "-"}
-                                                    </td>
-                                                ))}
-                                            </tr>
 
-                                            {/* แถวสรุปรวมทั้งหมด */}
-                                            <tr className="bg-slate-800 text-white">
-                                                <td colSpan="2" className="px-6 py-5 font-bold text-base rounded-bl-lg">
-                                                    คะแนนรวมสะสมสุทธิ
-                                                </td>
-                                                {staffScores.map(staff => (
-                                                    <td key={staff.id} className="px-6 py-5 text-center font-black text-lg text-indigo-200">
-                                                        {staff.totalPoints.toFixed(2)}
-                                                    </td>
+                                {/* โซนแสดงเนื้อหา */}
+                                <div className="p-0">
+                                    {/* 1. โหมดตารางสรุปผล (แสดงเสมอตอนปรินต์) */}
+                                    <div className={`overflow-x-auto ${activeTab === 'summary' ? 'block' : 'hidden print:block'}`}>
+                                        <table className="w-full text-sm text-left whitespace-nowrap">
+                                            <thead className="text-xs text-slate-500 font-semibold bg-slate-50/80 border-b border-slate-200">
+                                                <tr>
+                                                    <th className="px-6 py-4 rounded-tl-lg">รุ่นเครื่อง</th>
+                                                    <th className="px-6 py-4 text-center">คะแนน/เครื่อง</th>
+                                                    {STAFF.map(s => (
+                                                        <th key={s.id} className="px-6 py-4 text-center">{s.name}</th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100">
+                                                {MODELS.filter(m => 
+                                                    STAFF.some(s => (records[s.id]?.[m.id] || 0) > 0)
+                                                ).map((model) => (
+                                                    <tr key={model.id} className="hover:bg-slate-50/60 transition-colors">
+                                                        <td className="px-6 py-3.5 font-medium text-slate-700">
+                                                            {model.name}
+                                                        </td>
+                                                        <td className="px-6 py-3.5 text-center text-slate-500">
+                                                            {model.points}
+                                                        </td>
+                                                        {STAFF.map(staff => {
+                                                            const count = records[staff.id]?.[model.id] || 0;
+                                                            return (
+                                                                <td key={staff.id} className="px-6 py-3.5 text-center">
+                                                                    {count > 0 ? (
+                                                                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-50 text-indigo-700 font-bold text-sm">
+                                                                            {count}
+                                                                        </span>
+                                                                    ) : (
+                                                                        <span className="text-slate-300">-</span>
+                                                                    )}
+                                                                </td>
+                                                            );
+                                                        })}
+                                                    </tr>
                                                 ))}
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                                
+                                                {/* แถวคะแนนเสริม */}
+                                                <tr className="bg-amber-50/30 hover:bg-amber-50/60 transition-colors">
+                                                    <td colSpan="2" className="px-6 py-4 font-semibold text-amber-800">
+                                                        <div className="flex items-center gap-2">
+                                                            <StarIcon className="w-4 h-4 text-amber-500" /> คะแนนงานเสริม
+                                                        </div>
+                                                    </td>
+                                                    {STAFF.map(staff => (
+                                                        <td key={staff.id} className="px-6 py-4 text-center font-bold text-amber-600">
+                                                            {extraPoints[staff.id] !== 0 ? (extraPoints[staff.id] > 0 ? `+${extraPoints[staff.id]}` : extraPoints[staff.id]) : "-"}
+                                                        </td>
+                                                    ))}
+                                                </tr>
+
+                                                {/* แถวสรุปรวมทั้งหมด */}
+                                                <tr className="bg-slate-800 text-white">
+                                                    <td colSpan="2" className="px-6 py-5 font-bold text-base rounded-bl-lg">
+                                                        คะแนนรวมสะสมสุทธิ
+                                                    </td>
+                                                    {staffScores.map(staff => (
+                                                        <td key={staff.id} className="px-6 py-5 text-center font-black text-lg text-indigo-200">
+                                                            {staff.totalPoints.toFixed(2)}
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* 2. โหมดประวัติรายวัน (ซ่อนตอนปรินต์) */}
+                                    <div className={`${activeTab === 'history' ? 'block' : 'hidden'} print:hidden p-6 bg-slate-50/50 max-h-[600px] overflow-y-auto`}>
+                                        {Object.keys(groupedLogs).length === 0 ? (
+                                            <div className="text-center text-slate-400 py-10">
+                                                <ActivityIcon className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                                <p>ยังไม่มีประวัติการบันทึกในเดือนนี้</p>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-6">
+                                                {Object.entries(groupedLogs).map(([dateStr, logsForDate]) => (
+                                                    <div key={dateStr} className="relative">
+                                                        <h3 className="text-sm font-bold text-slate-500 mb-3 sticky top-0 bg-slate-50/90 backdrop-blur py-1 z-10 flex items-center gap-2">
+                                                            <span className="w-2.5 h-2.5 rounded-full bg-indigo-400 shadow-[0_0_0_3px_rgba(99,102,241,0.2)]"></span>
+                                                            {dateStr}
+                                                        </h3>
+                                                        <div className="space-y-3 pl-4 border-l-2 border-slate-200 ml-[5px]">
+                                                            {logsForDate.map(log => {
+                                                                const timeStr = new Date(log.timestamp).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                                                                const staff = STAFF.find(s => s.id === log.staffId)?.name || 'ไม่ทราบชื่อ';
+                                                                
+                                                                if (log.type === 'model') {
+                                                                    const model = MODELS.find(m => m.id === log.modelId);
+                                                                    const modelName = model ? model.name : log.modelId;
+                                                                    const isAdd = log.amount > 0;
+                                                                    const pointEarned = model ? (log.amount * model.points) : 0;
+
+                                                                    return (
+                                                                        <div key={log.id} className="bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm text-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group hover:border-indigo-100 transition-colors">
+                                                                            <div className="flex items-center gap-3">
+                                                                                <span className="text-xs text-slate-400 font-medium w-10">{timeStr}</span>
+                                                                                <span className={`flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full ${isAdd ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-600'}`}>
+                                                                                    {isAdd ? <PlusCircleIcon className="w-4 h-4"/> : <MinusCircleIcon className="w-4 h-4"/>}
+                                                                                </span>
+                                                                                <span className="font-semibold text-slate-700">{staff}</span>
+                                                                                <span className="text-slate-500">{isAdd ? 'เพิ่มยอด' : 'ลบยอด'}&nbsp;<strong className="text-indigo-900">{modelName}</strong></span>
+                                                                            </div>
+                                                                            <div className="font-bold text-slate-700 flex items-center gap-2 pl-12 sm:pl-0">
+                                                                                {isAdd ? '+' : ''}{log.amount} <span className="text-xs text-slate-400 font-normal">เครื่อง</span>
+                                                                                <span className={`text-[11px] px-2 py-0.5 rounded-full ${isAdd ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                                                                                    {isAdd ? '+' : ''}{pointEarned.toFixed(2)} pt
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                } else if (log.type === 'extra') {
+                                                                    const isAdd = log.points > 0;
+                                                                    return (
+                                                                        <div key={log.id} className="bg-white p-3.5 rounded-xl border border-amber-100 shadow-sm text-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group hover:border-amber-200 transition-colors">
+                                                                            <div className="flex items-center gap-3">
+                                                                                <span className="text-xs text-slate-400 font-medium w-10">{timeStr}</span>
+                                                                                <span className={`flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full ${isAdd ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'}`}>
+                                                                                    <StarIcon className="w-4 h-4"/>
+                                                                                </span>
+                                                                                <span className="font-semibold text-slate-700">{staff}</span>
+                                                                                <span className="text-amber-700 font-medium">บันทึกคะแนนเสริม</span>
+                                                                            </div>
+                                                                            <div className="font-bold text-amber-600 pl-12 sm:pl-0">
+                                                                                {isAdd ? '+' : ''}{log.points} <span className="text-xs text-amber-400 font-normal">pt</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                }
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    
                                 </div>
                             </div>
                         </div>
