@@ -492,7 +492,10 @@
                         filename:     `สรุปคะแนนทีมโมดิฟายด์_${currentMonth}.pdf`,
                         image:        { type: 'jpeg', quality: 0.98 },
                         html2canvas:  { scale: 2, useCORS: true },
-                        jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+                        // เปลี่ยนจาก landscape เป็น portrait (แนวตั้ง)
+                        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+                        // ตั้งค่าให้ตัดหน้ากระดาษตามคลาสที่เราใส่ไว้
+                        pagebreak:    { mode: ['css', 'legacy'] }
                     };
 
                     html2pdf().set(opt).from(element).save().then(() => {
@@ -752,7 +755,7 @@
                         {/* เลนขวา: Dashboard สรุปผล (พื้นที่สำหรับสร้าง PDF) */}
                         <div className="lg:col-span-8 space-y-6" id="printable-area">
                             
-                            {/* แสดงหัวข้อเฉพาะตอนจะปรินต์ PDF */}
+                            {/* แสดงหัวข้อเฉพาะตอนจะปรินต์ PDF (หน้า 1) */}
                             <div className="hidden print:block mb-6">
                                 <div className="flex items-center gap-3 mb-2">
                                     <WrenchIcon className="w-6 h-6 text-slate-800" />
@@ -792,7 +795,7 @@
                                                     </div>
                                                     <div className="flex flex-col flex-1">
                                                         <div className="flex flex-wrap items-center gap-2">
-                                                            <h3 className="font-bold text-slate-800 text-[15px] sm:text-[16px] leading-tight break-words">
+                                                            <h3 className="font-bold text-slate-800 text-[15px] sm:text-[16px]">
                                                                 {staff.name}
                                                             </h3>
                                                             <div className="flex-shrink-0">
@@ -811,7 +814,7 @@
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        <p className="text-[12px] font-medium text-slate-400 mt-0.5 break-words">
+                                                        <p className="text-[12px] font-medium text-slate-400 mt-0.5">
                                                             {staff.role}
                                                         </p>
                                                     </div>
@@ -820,7 +823,7 @@
                                                     <p className="text-2xl sm:text-3xl font-bold text-slate-800 tracking-tight leading-none whitespace-nowrap">
                                                         {staff.totalPoints.toFixed(2)}
                                                     </p>
-                                                    <p className="text-[10px] sm:text-[11px] font-semibold text-slate-400 uppercase tracking-wide mt-1.5 whitespace-nowrap">
+                                                    <p className="text-[10px] sm:text-[11px] font-semibold text-slate-400 mt-1.5 whitespace-nowrap">
                                                         เป้าหมาย: {staff.kpi} pt
                                                     </p>
                                                 </div>
@@ -843,13 +846,13 @@
                                             {/* Info Grid */}
                                             <div className="grid grid-cols-2 gap-3 mt-auto mb-4">
                                                 <div className="border border-slate-100 rounded-xl p-3 flex flex-col justify-center items-center text-center bg-slate-50/50">
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ยังขาดอีก</span>
+                                                    <span className="text-[11px] font-bold text-slate-500 mb-1">ยังขาดอีก</span>
                                                     <span className="text-sm font-bold text-rose-500">
                                                         {staff.missingPoints > 0 ? staff.missingPoints.toFixed(2) : "ถึงเป้าแล้ว!"}
                                                     </span>
                                                 </div>
                                                 <div className="border border-slate-100 rounded-xl p-3 flex flex-col justify-center items-center text-center bg-slate-50/50">
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ต้องทำวันละ</span>
+                                                    <span className="text-[11px] font-bold text-slate-500 mb-1">ต้องทำวันละ</span>
                                                     <span className="text-sm font-bold text-slate-700">
                                                         {staff.pointsPerDayNeeded > 0 ? staff.pointsPerDayNeeded.toFixed(2) : "-"} <span className="text-[10px] text-slate-400">pt</span>
                                                     </span>
@@ -885,16 +888,19 @@
                                 })}
                             </div>
 
-                            {/* Data Table / History Tab Control */}
-                            <div className="bg-white rounded-2xl shadow-card overflow-hidden flex flex-col print-force-summary border border-slate-100">
+                            {/* --- ตัวตัดหน้ากระดาษ (Page Break) สำหรับ PDF --- */}
+                            <div className="html2pdf__page-break"></div>
+
+                            {/* Data Table / History Tab Control (หน้า 2) */}
+                            <div className="bg-white rounded-2xl shadow-card overflow-hidden flex flex-col print-force-summary border border-slate-100 print:shadow-none print:border-none print:bg-transparent print:mt-4">
                                 
                                 {/* แถบเลือกโหมด (ซ่อนตอนปรินต์) */}
-                                <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-100 bg-white flex items-center justify-between gap-4 overflow-x-auto hide-scrollbar">
+                                <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-100 bg-white flex items-center justify-between gap-4 overflow-x-auto hide-scrollbar print:hidden">
                                     <h2 className="font-bold text-[15px] sm:text-[16px] text-slate-800 flex items-center gap-2 whitespace-nowrap flex-shrink-0">
                                         {activeTab === 'summary' ? <ListIcon className="w-4 h-4 text-slate-400" /> : activeTab === 'history' ? <ActivityIcon className="w-4 h-4 text-slate-400" /> : <CalendarIcon className="w-4 h-4 text-slate-400" />}
                                         {activeTab === 'summary' ? 'ตารางสรุปผลงาน' : activeTab === 'history' ? 'ประวัติการบันทึก' : 'ประวัติรายเดือน'}
                                     </h2>
-                                    <div className="flex bg-slate-50 p-1 rounded-lg border border-slate-100 print:hidden gap-1 flex-shrink-0">
+                                    <div className="flex bg-slate-50 p-1 rounded-lg border border-slate-100 gap-1 flex-shrink-0">
                                         <button 
                                             onClick={() => setActiveTab('summary')}
                                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all whitespace-nowrap ${activeTab === 'summary' ? 'bg-white text-brand-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
@@ -920,37 +926,37 @@
                                 <div className="p-0">
                                     {/* 1. โหมดตารางสรุปผล (แสดงเสมอตอนปรินต์) */}
                                     <div className={`overflow-x-auto ${activeTab === 'summary' ? 'block' : 'hidden print:block'}`}>
-                                        <table className="w-full text-[13px] text-left whitespace-nowrap">
-                                            <thead className="text-[14px] text-slate-800 font-bold bg-slate-100/80 border-b-2 border-slate-200">
+                                        <table className="w-full text-[13px] print:text-[11px] text-left whitespace-nowrap">
+                                            <thead className="text-[14px] print:text-[12px] text-slate-800 font-bold bg-slate-100/80 border-b-2 border-slate-200 print:bg-slate-200/50">
                                                 <tr>
-                                                    <th className="px-6 py-4 rounded-tl-lg">รุ่นเครื่อง</th>
-                                                    <th className="px-6 py-4 text-center">คะแนน/เครื่อง</th>
+                                                    <th className="px-6 py-4 print:py-2 print:px-4 rounded-tl-lg">รุ่นเครื่อง</th>
+                                                    <th className="px-6 py-4 print:py-2 print:px-4 text-center">คะแนน/เครื่อง</th>
                                                     {STAFF.map(s => (
-                                                        <th key={s.id} className="px-6 py-4 text-center">{s.name}</th>
+                                                        <th key={s.id} className="px-6 py-4 print:py-2 print:px-4 text-center">{s.name}</th>
                                                     ))}
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-slate-50">
+                                            <tbody className="divide-y divide-slate-50 print:divide-slate-100">
                                                 {MODELS.filter(m => 
                                                     STAFF.some(s => (records[s.id]?.[m.id] || 0) > 0)
                                                 ).map((model) => (
                                                     <tr key={model.id} className="hover:bg-slate-50/50 transition-colors">
-                                                        <td className="px-6 py-3.5 font-semibold text-slate-700">
+                                                        <td className="px-6 py-3.5 print:py-1.5 print:px-4 font-semibold text-slate-700">
                                                             {model.name}
                                                         </td>
-                                                        <td className="px-6 py-3.5 text-center font-medium text-slate-400">
+                                                        <td className="px-6 py-3.5 print:py-1.5 print:px-4 text-center font-medium text-slate-400 print:text-slate-500">
                                                             {model.points}
                                                         </td>
                                                         {STAFF.map(staff => {
                                                             const count = records[staff.id]?.[model.id] || 0;
                                                             return (
-                                                                <td key={staff.id} className="px-6 py-3.5 text-center">
+                                                                <td key={staff.id} className="px-6 py-3.5 print:py-1.5 print:px-4 text-center">
                                                                     {count > 0 ? (
-                                                                        <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded bg-slate-100 text-slate-700 font-bold text-[12px]">
+                                                                        <span className="inline-flex items-center justify-center min-w-[28px] h-7 print:h-5 print:min-w-[20px] px-2 print:px-1 rounded bg-slate-100 print:bg-transparent text-slate-700 font-bold text-[12px] print:text-[11px]">
                                                                             {count}
                                                                         </span>
                                                                     ) : (
-                                                                        <span className="text-slate-200 font-medium">-</span>
+                                                                        <span className="text-slate-200 font-medium print:text-slate-300">-</span>
                                                                     )}
                                                                 </td>
                                                             );
@@ -959,36 +965,36 @@
                                                 ))}
                                                 
                                                 {/* แถวสรุปจำนวนเครื่องทั้งหมด */}
-                                                <tr className="bg-slate-50/80 border-t border-slate-200">
-                                                    <td colSpan="2" className="px-6 py-4 font-bold text-slate-500 text-[12px] uppercase tracking-wider">
+                                                <tr className="bg-slate-50/80 print:bg-slate-100/50 border-t border-slate-200">
+                                                    <td colSpan="2" className="px-6 py-4 print:py-2.5 print:px-4 font-bold text-slate-500 print:text-slate-600 text-[12px] uppercase tracking-wider">
                                                         ยอดรวมเครื่องที่ทำได้
                                                     </td>
                                                     {staffScores.map(staff => (
-                                                        <td key={staff.id} className="px-6 py-4 text-center font-bold text-slate-700 text-sm">
+                                                        <td key={staff.id} className="px-6 py-4 print:py-2.5 print:px-4 text-center font-bold text-slate-700 text-sm print:text-[12px]">
                                                             {staff.totalMachines}
                                                         </td>
                                                     ))}
                                                 </tr>
 
                                                 {/* แถวคะแนนเสริม */}
-                                                <tr className="bg-amber-50/30 hover:bg-amber-50/50 transition-colors border-t border-slate-100">
-                                                    <td colSpan="2" className="px-6 py-4 font-bold text-amber-700 text-[12px] uppercase tracking-wider">
+                                                <tr className="bg-amber-50/30 print:bg-amber-50 hover:bg-amber-50/50 transition-colors border-t border-slate-100">
+                                                    <td colSpan="2" className="px-6 py-4 print:py-2.5 print:px-4 font-bold text-amber-700 text-[12px] uppercase tracking-wider">
                                                         คะแนนงานเสริม
                                                     </td>
                                                     {STAFF.map(staff => (
-                                                        <td key={staff.id} className="px-6 py-4 text-center font-bold text-amber-600">
+                                                        <td key={staff.id} className="px-6 py-4 print:py-2.5 print:px-4 text-center font-bold text-amber-600 print:text-amber-700">
                                                             {extraPoints[staff.id] !== 0 ? (extraPoints[staff.id] > 0 ? `+${extraPoints[staff.id]}` : extraPoints[staff.id]) : "-"}
                                                         </td>
                                                     ))}
                                                 </tr>
 
                                                 {/* แถวสรุปรวมทั้งหมด */}
-                                                <tr className="bg-slate-800 text-white border-t-2 border-slate-900">
-                                                    <td colSpan="2" className="px-6 py-5 font-bold text-[14px] uppercase tracking-wider rounded-bl-lg">
+                                                <tr className="bg-slate-800 print:bg-slate-700 text-white border-t-2 border-slate-900 print:border-slate-800">
+                                                    <td colSpan="2" className="px-6 py-5 print:py-3 print:px-4 font-bold text-[14px] print:text-[13px] uppercase tracking-wider rounded-bl-lg print:rounded-none">
                                                         คะแนนรวมสะสมสุทธิ
                                                     </td>
                                                     {staffScores.map(staff => (
-                                                        <td key={staff.id} className="px-6 py-5 text-center font-bold text-[16px]">
+                                                        <td key={staff.id} className="px-6 py-5 print:py-3 print:px-4 text-center font-bold text-[16px] print:text-[14px]">
                                                             {staff.totalPoints.toFixed(2)}
                                                         </td>
                                                     ))}
