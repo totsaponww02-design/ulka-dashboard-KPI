@@ -67,6 +67,15 @@
             -webkit-appearance: none; 
             margin: 0; 
         }
+        
+        /* ซ่อน Scrollbar แต่ยังสามารถเลื่อนซ้าย-ขวาได้ */
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -89,6 +98,7 @@
         const ListIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>;
         const ActivityIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>;
         const ChevronDownIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 12 15 18 9"/></svg>;
+        const CalendarIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
 
         // --- Custom Searchable Select Component (ดีไซน์ใหม่) ---
         const SearchableSelect = ({ options, value, onChange, placeholder = "ค้นหา...", containerClass, activeBgClass }) => {
@@ -500,16 +510,16 @@
                     
                     {/* Header Section */}
                     <div className="max-w-6xl mx-auto mb-8">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-card">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-brand-600 rounded-xl shadow-md shadow-brand-500/20 text-white">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-card overflow-hidden">
+                            <div className="flex items-center gap-4 overflow-x-auto hide-scrollbar pb-1 -mb-1">
+                                <div className="p-3 bg-brand-600 rounded-xl shadow-md shadow-brand-500/20 text-white flex-shrink-0">
                                     <WrenchIcon className="w-6 h-6" />
                                 </div>
-                                <div>
-                                    <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">
+                                <div className="flex-shrink-0">
+                                    <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight whitespace-nowrap">
                                         ระบบติดตามคะแนนทีมโมดิฟายด์
                                     </h1>
-                                    <div className="flex items-center gap-3 text-slate-500 font-medium text-sm mt-1">
+                                    <div className="flex items-center gap-3 text-slate-500 font-medium text-sm mt-1 whitespace-nowrap">
                                         <span className="flex items-center gap-1.5 text-slate-400"><HistoryIcon className="w-4 h-4"/> ประจำเดือน:</span>
                                         <input 
                                             type="month" 
@@ -521,7 +531,7 @@
                                 </div>
                             </div>
                             
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 flex-shrink-0">
                                 <button 
                                     onClick={handleDownloadPDF}
                                     disabled={isDownloading}
@@ -817,23 +827,29 @@
                             <div className="bg-white rounded-2xl shadow-card overflow-hidden flex flex-col print-force-summary border border-slate-100">
                                 
                                 {/* แถบเลือกโหมด (ซ่อนตอนปรินต์) */}
-                                <div className="px-5 py-4 border-b border-slate-100 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                    <h2 className="font-bold text-[16px] text-slate-800 flex items-center gap-2">
-                                        {activeTab === 'summary' ? <ListIcon className="w-4 h-4 text-slate-400" /> : <ActivityIcon className="w-4 h-4 text-slate-400" />}
-                                        {activeTab === 'summary' ? 'ตารางสรุปผลงานรายบุคคล' : 'ประวัติการบันทึกรายวัน'}
+                                <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-100 bg-white flex items-center justify-between gap-4 overflow-x-auto hide-scrollbar">
+                                    <h2 className="font-bold text-[15px] sm:text-[16px] text-slate-800 flex items-center gap-2 whitespace-nowrap flex-shrink-0">
+                                        {activeTab === 'summary' ? <ListIcon className="w-4 h-4 text-slate-400" /> : activeTab === 'history' ? <ActivityIcon className="w-4 h-4 text-slate-400" /> : <CalendarIcon className="w-4 h-4 text-slate-400" />}
+                                        {activeTab === 'summary' ? 'ตารางสรุปผลงาน' : activeTab === 'history' ? 'ประวัติการบันทึก' : 'ย้อนหลังรายเดือน'}
                                     </h2>
-                                    <div className="flex bg-slate-50 p-1 rounded-lg border border-slate-100 print:hidden">
+                                    <div className="flex bg-slate-50 p-1 rounded-lg border border-slate-100 print:hidden gap-1 flex-shrink-0">
                                         <button 
                                             onClick={() => setActiveTab('summary')}
-                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all ${activeTab === 'summary' ? 'bg-white text-brand-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all whitespace-nowrap ${activeTab === 'summary' ? 'bg-white text-brand-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
                                         >
-                                            สรุปยอด
+                                            <ListIcon className="w-3.5 h-3.5" /> สรุปยอด
                                         </button>
                                         <button 
                                             onClick={() => setActiveTab('history')}
-                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all ${activeTab === 'history' ? 'bg-white text-brand-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all whitespace-nowrap ${activeTab === 'history' ? 'bg-white text-brand-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
                                         >
-                                            ประวัติย้อนหลัง
+                                            <ActivityIcon className="w-3.5 h-3.5" /> ประวัติรายวัน
+                                        </button>
+                                        <button 
+                                            onClick={() => setActiveTab('monthly')}
+                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all whitespace-nowrap ${activeTab === 'monthly' ? 'bg-white text-brand-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                                        >
+                                            <CalendarIcon className="w-3.5 h-3.5" /> ย้อนหลังรายเดือน
                                         </button>
                                     </div>
                                 </div>
@@ -843,7 +859,7 @@
                                     {/* 1. โหมดตารางสรุปผล (แสดงเสมอตอนปรินต์) */}
                                     <div className={`overflow-x-auto ${activeTab === 'summary' ? 'block' : 'hidden print:block'}`}>
                                         <table className="w-full text-[13px] text-left whitespace-nowrap">
-                                            <thead className="text-[11px] text-slate-400 font-bold uppercase tracking-wider bg-slate-50/50 border-b border-slate-100">
+                                            <thead className="text-[14px] text-slate-800 font-bold bg-slate-100/80 border-b-2 border-slate-200">
                                                 <tr>
                                                     <th className="px-6 py-4 rounded-tl-lg">รุ่นเครื่อง</th>
                                                     <th className="px-6 py-4 text-center">คะแนน/เครื่อง</th>
@@ -996,6 +1012,66 @@
                                         )}
                                     </div>
                                     
+                                    {/* 3. โหมดสรุปรายเดือนย้อนหลัง (ซ่อนตอนปรินต์) */}
+                                    <div className={`${activeTab === 'monthly' ? 'block' : 'hidden'} print:hidden p-0 overflow-x-auto`}>
+                                        <table className="w-full text-[13px] text-left whitespace-nowrap">
+                                            <thead className="text-[14px] text-slate-800 font-bold bg-slate-100/80 border-b-2 border-slate-200">
+                                                <tr>
+                                                    <th className="px-6 py-4 rounded-tl-lg">ประจำเดือน</th>
+                                                    {STAFF.map(s => (
+                                                        <th key={s.id} className="px-6 py-4 text-center">{s.name} <span className="text-[11px] font-medium text-slate-500 block mt-0.5">({s.kpi} pt)</span></th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-50">
+                                                {Object.keys(db).sort().reverse().map(monthKey => {
+                                                    const mData = db[monthKey];
+                                                    const [y, m] = monthKey.split('-');
+                                                    const monthName = new Date(y, m - 1).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+
+                                                    return (
+                                                        <tr key={monthKey} className="hover:bg-slate-50/50 transition-colors group">
+                                                            <td 
+                                                                className="px-6 py-4 font-bold text-slate-700 cursor-pointer hover:text-brand-600"
+                                                                onClick={() => { setCurrentMonth(monthKey); setActiveTab('summary'); }}
+                                                                title={`คลิกเพื่อดูรายละเอียดของเดือน ${monthName}`}
+                                                            >
+                                                                <div className="flex items-center gap-2">
+                                                                    <CalendarIcon className="w-4 h-4 text-slate-400 group-hover:text-brand-500 transition-colors" />
+                                                                    {monthName}
+                                                                </div>
+                                                            </td>
+                                                            {STAFF.map(staff => {
+                                                                let totalPoints = 0;
+                                                                const pRecs = mData.records?.[staff.id] || {};
+                                                                Object.entries(pRecs).forEach(([modelId, count]) => {
+                                                                    const model = MODELS.find(m => m.id === modelId);
+                                                                    if (model) totalPoints += count * model.points;
+                                                                });
+                                                                totalPoints += (mData.extraPoints?.[staff.id] || 0);
+                                                                
+                                                                const isGood = totalPoints >= staff.kpi;
+
+                                                                return (
+                                                                    <td key={staff.id} className={`px-6 py-4 text-center font-bold ${totalPoints > 0 ? (isGood ? 'text-emerald-600' : 'text-slate-600') : 'text-slate-300'}`}>
+                                                                        {totalPoints > 0 ? (
+                                                                            <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-md ${isGood ? 'bg-emerald-50' : 'bg-slate-50'}`}>
+                                                                                {totalPoints.toFixed(2)}
+                                                                            </span>
+                                                                        ) : '-'}
+                                                                    </td>
+                                                                );
+                                                            })}
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                        {Object.keys(db).length === 0 && (
+                                            <div className="text-center text-slate-400 py-16">ยังไม่มีข้อมูลในระบบ</div>
+                                        )}
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
