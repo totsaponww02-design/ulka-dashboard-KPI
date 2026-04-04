@@ -892,7 +892,7 @@
                                 <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-100 bg-white flex items-center justify-between gap-4 overflow-x-auto hide-scrollbar">
                                     <h2 className="font-bold text-[15px] sm:text-[16px] text-slate-800 flex items-center gap-2 whitespace-nowrap flex-shrink-0">
                                         {activeTab === 'summary' ? <ListIcon className="w-4 h-4 text-slate-400" /> : activeTab === 'history' ? <ActivityIcon className="w-4 h-4 text-slate-400" /> : <CalendarIcon className="w-4 h-4 text-slate-400" />}
-                                        {activeTab === 'summary' ? 'ตารางสรุปผลงาน' : activeTab === 'history' ? 'ประวัติการบันทึก' : 'ย้อนหลังรายเดือน'}
+                                        {activeTab === 'summary' ? 'ตารางสรุปผลงาน' : activeTab === 'history' ? 'ประวัติการบันทึก' : 'ประวัติรายเดือน'}
                                     </h2>
                                     <div className="flex bg-slate-50 p-1 rounded-lg border border-slate-100 print:hidden gap-1 flex-shrink-0">
                                         <button 
@@ -911,7 +911,7 @@
                                             onClick={() => setActiveTab('monthly')}
                                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all whitespace-nowrap ${activeTab === 'monthly' ? 'bg-white text-brand-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
                                         >
-                                            <CalendarIcon className="w-3.5 h-3.5" /> ย้อนหลังรายเดือน
+                                            <CalendarIcon className="w-3.5 h-3.5" /> ประวัติรายเดือน
                                         </button>
                                     </div>
                                 </div>
