@@ -693,7 +693,10 @@
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 {staffScores.map(staff => {
                                     const progress = Math.min(100, (staff.totalPoints / staff.kpi) * 100);
-                                    const isWarning = progress < 30;
+                                    
+                                    // คำนวณจากวันที่เหลือ: ถ้ายอดที่ต้องทำต่อวันสูงกว่าค่าเฉลี่ยปกติ 1.5 เท่า (สมมติเดือนละ 22 วันทำงาน)
+                                    const normalDailyAvg = staff.kpi / 22;
+                                    const isWarning = staff.activeDays > 0 && staff.pointsPerDayNeeded > (normalDailyAvg * 1.5) && progress < 100;
                                     const isGood = progress >= 100;
 
                                     let statusColor = "bg-brand-500";
@@ -703,7 +706,7 @@
                                     if (isGood) {
                                         statusColor = "bg-emerald-500"; statusBg = "bg-emerald-50"; statusText = "text-emerald-600";
                                     } else if (isWarning) {
-                                        statusColor = "bg-rose-500"; statusBg = "bg-rose-50"; statusText = "text-rose-600";
+                                        statusColor = "bg-orange-500"; statusBg = "bg-orange-50"; statusText = "text-orange-600";
                                     }
 
                                     return (
@@ -726,8 +729,8 @@
                                                                         <CheckCircleIcon className="w-3 h-3" /> ทะลุเป้า
                                                                     </span>
                                                                 ) : isWarning ? (
-                                                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200 font-bold flex items-center gap-1 whitespace-nowrap">
-                                                                        <AlertCircleIcon className="w-3 h-3" /> ต้องเร่งมือ
+                                                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 border border-orange-200 font-bold flex items-center gap-1 whitespace-nowrap">
+                                                                        <ActivityIcon className="w-3 h-3" /> สู้ๆ นะ
                                                                     </span>
                                                                 ) : (
                                                                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-100 font-bold flex items-center gap-1 whitespace-nowrap">
