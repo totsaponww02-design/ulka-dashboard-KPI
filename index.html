@@ -1021,6 +1021,7 @@
                                                     {STAFF.map(s => (
                                                         <th key={s.id} className="px-6 py-4 text-center">{s.name} <span className="text-[11px] font-medium text-slate-500 block mt-0.5">({s.kpi} pt)</span></th>
                                                     ))}
+                                                    <th className="px-6 py-4 text-center rounded-tr-lg">จัดการ</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-50">
@@ -1031,11 +1032,7 @@
 
                                                     return (
                                                         <tr key={monthKey} className="hover:bg-slate-50/50 transition-colors group">
-                                                            <td 
-                                                                className="px-6 py-4 font-bold text-slate-700 cursor-pointer hover:text-brand-600"
-                                                                onClick={() => { setCurrentMonth(monthKey); setActiveTab('summary'); }}
-                                                                title={`คลิกเพื่อดูรายละเอียดของเดือน ${monthName}`}
-                                                            >
+                                                            <td className="px-6 py-4 font-bold text-slate-700">
                                                                 <div className="flex items-center gap-2">
                                                                     <CalendarIcon className="w-4 h-4 text-slate-400 group-hover:text-brand-500 transition-colors" />
                                                                     {monthName}
@@ -1043,25 +1040,42 @@
                                                             </td>
                                                             {STAFF.map(staff => {
                                                                 let totalPoints = 0;
+                                                                let totalMachines = 0;
                                                                 const pRecs = mData.records?.[staff.id] || {};
                                                                 Object.entries(pRecs).forEach(([modelId, count]) => {
                                                                     const model = MODELS.find(m => m.id === modelId);
-                                                                    if (model) totalPoints += count * model.points;
+                                                                    if (model) {
+                                                                        totalPoints += count * model.points;
+                                                                        totalMachines += count;
+                                                                    }
                                                                 });
                                                                 totalPoints += (mData.extraPoints?.[staff.id] || 0);
                                                                 
                                                                 const isGood = totalPoints >= staff.kpi;
 
                                                                 return (
-                                                                    <td key={staff.id} className={`px-6 py-4 text-center font-bold ${totalPoints > 0 ? (isGood ? 'text-emerald-600' : 'text-slate-600') : 'text-slate-300'}`}>
+                                                                    <td key={staff.id} className={`px-6 py-4 text-center ${totalPoints > 0 ? (isGood ? 'text-emerald-600' : 'text-slate-600') : 'text-slate-300'}`}>
                                                                         {totalPoints > 0 ? (
-                                                                            <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-md ${isGood ? 'bg-emerald-50' : 'bg-slate-50'}`}>
-                                                                                {totalPoints.toFixed(2)}
-                                                                            </span>
+                                                                            <div className="flex flex-col items-center gap-1">
+                                                                                <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-md font-bold ${isGood ? 'bg-emerald-50' : 'bg-slate-50'}`}>
+                                                                                    {totalPoints.toFixed(2)}
+                                                                                </span>
+                                                                                <span className="text-[11px] font-medium text-slate-400">
+                                                                                    {totalMachines} เครื่อง
+                                                                                </span>
+                                                                            </div>
                                                                         ) : '-'}
                                                                     </td>
                                                                 );
                                                             })}
+                                                            <td className="px-6 py-4 text-center">
+                                                                <button 
+                                                                    onClick={() => { setCurrentMonth(monthKey); setActiveTab('summary'); }}
+                                                                    className="px-3 py-1.5 bg-brand-50 text-brand-600 hover:bg-brand-100 rounded-lg text-[12px] font-semibold transition-colors active:scale-[0.98]"
+                                                                >
+                                                                    ดูรายละเอียด
+                                                                </button>
+                                                            </td>
                                                         </tr>
                                                     );
                                                 })}
