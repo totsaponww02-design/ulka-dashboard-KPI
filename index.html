@@ -203,8 +203,8 @@
             { id: 'PROSODA', name: 'PROSODA', points: 1.15 },
             { id: 'PROSODA-MAX', name: 'PROSODA-MAX', points: 1.15 },
             { id: 'RO-G600', name: 'RO-G600', points: 1.15 },
-            { id: 'Prosoda-G15Pro', name: 'Prosoda-G15Pro', points: 1.15 },
-            { id: 'Prosoda-G830', name: 'Prosoda-G830', points: 1.15 },
+            { id: 'Prosoda-G15Pro', name: 'PROSODA-MAX V.MIX', points: 1.15 },
+            { id: 'Prosoda-G830', name: 'PROSODA-MIX', points: 1.15 },
             { id: '15AF', name: '15AF', points: 1.495 },
             { id: '20AF', name: '20AF', points: 1.495 },
             { id: '9CN', name: '9CN', points: 1.495 },
@@ -308,7 +308,30 @@
         const getInitialDatabase = () => {
             const savedData = localStorage.getItem('modifyTeamData');
             if (savedData) {
-                return JSON.parse(savedData);
+                const data = JSON.parse(savedData);
+                
+                // --- Auto Migration: เชื่อมข้อมูลเก่าเข้ากับชื่อใหม่ ---
+                Object.values(data).forEach(month => {
+                    if (month.records) {
+                        Object.values(month.records).forEach(staffRecord => {
+                            if (staffRecord['PROSODA-MAX-VMIX']) {
+                                staffRecord['Prosoda-G15Pro'] = (staffRecord['Prosoda-G15Pro'] || 0) + staffRecord['PROSODA-MAX-VMIX'];
+                                delete staffRecord['PROSODA-MAX-VMIX'];
+                            }
+                            if (staffRecord['PROSODA-MIX']) {
+                                staffRecord['Prosoda-G830'] = (staffRecord['Prosoda-G830'] || 0) + staffRecord['PROSODA-MIX'];
+                                delete staffRecord['PROSODA-MIX'];
+                            }
+                        });
+                    }
+                    if (month.logs) {
+                        month.logs.forEach(log => {
+                            if (log.modelId === 'PROSODA-MAX-VMIX') log.modelId = 'Prosoda-G15Pro';
+                            if (log.modelId === 'PROSODA-MIX') log.modelId = 'Prosoda-G830';
+                        });
+                    }
+                });
+                return data;
             }
             const initialMonth = '2026-04';
             return {
