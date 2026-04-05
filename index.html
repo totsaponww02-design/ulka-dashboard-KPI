@@ -252,20 +252,23 @@
             { id: 'CABIN-1400XJ', name: 'CABIN-1400XJ', points: 11.96 }
         ];
 
-        // --- กำหนดวันเสาร์ที่ทำงาน และ ตำแหน่งหน้าที่ ---
+        // --- กำหนดรายชื่อพนักงาน วันเสาร์ที่ทำงาน และ ตำแหน่งหน้าที่ ---
+        // endDate: กำหนดเดือนที่ลาออก (รูปแบบ YYYY-MM) หากไม่มีแปลว่ายังทำงานอยู่
         const STAFF = [
             { id: 'nakrob', name: 'นักรบ', role: 'โมดิฟาย/แพ็ค', kpi: 156, satWork: [2, 4] },
             { id: 'amin', name: 'อามิน', role: 'โมดิฟาย', kpi: 312, satWork: [2, 4] },
             { id: 'guy', name: 'กาย', role: 'โมดิฟาย', kpi: 312, satWork: [1, 3] },
-            { id: 'pman', name: 'พี่แมน', role: 'โมดิฟาย/แพ็ค', kpi: 156, satWork: [1, 3] }
+            { id: 'pman', name: 'พี่แมน', role: 'โมดิฟาย/แพ็ค', kpi: 156, satWork: [1, 3] },
+            { id: 'bom', name: 'บอม', role: 'โมดิฟาย', kpi: 312, satWork: [1, 3], endDate: '2026-03' } // เพิ่มคุณบอม และกำหนดให้สิ้นสุดงานเดือน 03
         ];
 
-        // ข้อมูลตัวเลือกสำหรับการค้นหา
-        const STAFF_OPTIONS = STAFF.map(s => ({ id: s.id, label: s.name, subLabel: `(${s.role})` }));
         const MODEL_OPTIONS = MODELS.map(m => ({ id: m.id, label: m.name, subLabel: `(+${m.points} pt)` }));
 
         // ฟังก์ชันคำนวณวันทำงานที่เหลือแบบออโต้รายบุคคล
         const calculateAutoDaysLeft = (monthStr, staff) => {
+            // ถ้าระบบกำลังดูเดือนที่เขาลาออกไปแล้ว ให้วันเหลือ = 0
+            if (staff.endDate && monthStr > staff.endDate) return 0;
+
             const today = new Date();
             const currentY = today.getFullYear();
             const currentM = today.getMonth() + 1;
@@ -361,6 +364,32 @@
             const customDaysLeft = currentMonthData.customDaysLeft || {};
             const logs = currentMonthData.logs || [];
 
+            // คำนวณหา "พนักงานที่ต้องแสดงผลในเดือนที่กำลังดูอยู่"
+            const visibleStaff = useMemo(() => {
+                return STAFF.filter(staff => {
+                    // กรณี 1: พนักงานยังไม่ลาออก หรือ เดือนที่กำลังดูอยู่น้อยกว่า/เท่ากับ เดือนที่เขาลาออก
+                    const isActiveInCurrentMonth = !staff.endDate || currentMonth <= staff.endDate;
+                    
+                    // กรณี 2: เผื่อมีข้อมูลคะแนนหลงอยู่ในเดือนที่เขาลาออกไปแล้ว (เช่น คีย์ย้อนหลัง) ก็ต้องแสดงชื่อเขาด้วยเพื่อไม่ให้ข้อมูลหาย
+                    const hasRecords = records[staff.id] && Object.keys(records[staff.id]).length > 0;
+                    const hasExtra = extraPoints[staff.id] && extraPoints[staff.id] !== 0;
+                    
+                    return isActiveInCurrentMonth || hasRecords || hasExtra;
+                });
+            }, [currentMonth, records, extraPoints]);
+
+            // สร้างตัวเลือกเฉพาะพนักงานที่แสดงผลได้
+            const staffOptions = useMemo(() => {
+                return visibleStaff.map(s => {
+                    const isResigned = s.endDate && currentMonth > s.endDate;
+                    return { 
+                        id: s.id, 
+                        label: s.name, 
+                        subLabel: `(${s.role}${isResigned ? ' - ลาออกแล้ว' : ''})` 
+                    };
+                });
+            }, [visibleStaff, currentMonth]);
+
             // State สำหรับวันที่ในฟอร์ม (ค่าเริ่มต้นคือวันนี้)
             const [recordDate, setRecordDate] = useState(getLocalDateStr());
             const [extraDate, setExtraDate] = useState(getLocalDateStr());
@@ -375,6 +404,18 @@
             
             const [isDownloading, setIsDownloading] = useState(false);
             const [notification, setNotification] = useState(null);
+
+            // เซ็ตค่าชื่อพนักงานเริ่มต้นใหม่ หากเปลี่ยนเดือนแล้วพนักงานที่เลือกไว้ก่อนหน้าถูกซ่อน
+            useEffect(() => {
+                if (visibleStaff.length > 0) {
+                    if (!visibleStaff.find(s => s.id === selectedStaff)) {
+                        setSelectedStaff(visibleStaff[0].id);
+                    }
+                    if (!visibleStaff.find(s => s.id === selectedStaffExtra)) {
+                        setSelectedStaffExtra(visibleStaff[0].id);
+                    }
+                }
+            }, [visibleStaff, selectedStaff, selectedStaffExtra]);
 
             useEffect(() => {
                 localStorage.setItem('modifyTeamData', JSON.stringify(db));
@@ -515,9 +556,7 @@
                         filename:     `สรุปคะแนนทีมโมดิฟายด์_${currentMonth}.pdf`,
                         image:        { type: 'jpeg', quality: 0.98 },
                         html2canvas:  { scale: 2, useCORS: true },
-                        // เปลี่ยนจาก landscape เป็น portrait (แนวตั้ง)
                         jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-                        // ตั้งค่าให้ตัดหน้ากระดาษตามคลาสที่เราใส่ไว้
                         pagebreak:    { mode: ['css', 'legacy'] }
                     };
 
@@ -528,7 +567,7 @@
             };
 
             const staffScores = useMemo(() => {
-                return STAFF.map(person => {
+                return visibleStaff.map(person => {
                     let totalPoints = 0;
                     let totalMachines = 0;
                     const personRecords = records[person.id] || {};
@@ -557,7 +596,7 @@
                         pointsPerDayNeeded: Math.max(0, (person.kpi - totalPoints) / daysToDivide)
                     };
                 });
-            }, [records, extraPoints, currentMonth, customDaysLeft]);
+            }, [records, extraPoints, currentMonth, customDaysLeft, visibleStaff]);
 
             const groupedLogs = useMemo(() => {
                 const groups = {};
@@ -641,7 +680,7 @@
                                     <div>
                                         <label className="block text-[13px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">ชื่อพนักงาน</label>
                                         <SearchableSelect 
-                                            options={STAFF_OPTIONS} 
+                                            options={staffOptions} 
                                             value={selectedStaff} 
                                             onChange={setSelectedStaff} 
                                             placeholder="ค้นหาชื่อพนักงาน..."
@@ -726,7 +765,7 @@
                                     <div>
                                         <label className="block text-[13px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">ชื่อพนักงาน</label>
                                         <SearchableSelect 
-                                            options={STAFF_OPTIONS} 
+                                            options={staffOptions} 
                                             value={selectedStaffExtra} 
                                             onChange={setSelectedStaffExtra} 
                                             placeholder="ค้นหาชื่อพนักงาน..."
@@ -818,7 +857,7 @@
                                                     </div>
                                                     <div className="flex flex-col flex-1">
                                                         <div className="flex flex-wrap items-center gap-2">
-                                                            <h3 className="font-bold text-slate-800 text-[15px] sm:text-[16px]">
+                                                            <h3 className="font-bold text-slate-800 text-[15px] sm:text-[16px] leading-tight break-words">
                                                                 {staff.name}
                                                             </h3>
                                                             <div className="flex-shrink-0">
@@ -837,7 +876,7 @@
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        <p className="text-[12px] font-medium text-slate-400 mt-0.5">
+                                                        <p className="text-[12px] font-medium text-slate-400 mt-0.5 break-words">
                                                             {staff.role}
                                                         </p>
                                                     </div>
@@ -954,14 +993,14 @@
                                                 <tr>
                                                     <th className="px-6 py-4 print:py-2 print:px-4 rounded-tl-lg">รุ่นเครื่อง</th>
                                                     <th className="px-6 py-4 print:py-2 print:px-4 text-center">คะแนน/เครื่อง</th>
-                                                    {STAFF.map(s => (
+                                                    {visibleStaff.map(s => (
                                                         <th key={s.id} className="px-6 py-4 print:py-2 print:px-4 text-center">{s.name}</th>
                                                     ))}
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-50 print:divide-slate-100">
                                                 {MODELS.filter(m => 
-                                                    STAFF.some(s => (records[s.id]?.[m.id] || 0) > 0)
+                                                    visibleStaff.some(s => (records[s.id]?.[m.id] || 0) > 0)
                                                 ).map((model) => (
                                                     <tr key={model.id} className="hover:bg-slate-50/50 transition-colors">
                                                         <td className="px-6 py-3.5 print:py-1.5 print:px-4 font-semibold text-slate-700">
@@ -970,7 +1009,7 @@
                                                         <td className="px-6 py-3.5 print:py-1.5 print:px-4 text-center font-medium text-slate-400 print:text-slate-500">
                                                             {model.points}
                                                         </td>
-                                                        {STAFF.map(staff => {
+                                                        {visibleStaff.map(staff => {
                                                             const count = records[staff.id]?.[model.id] || 0;
                                                             return (
                                                                 <td key={staff.id} className="px-6 py-3.5 print:py-1.5 print:px-4 text-center">
@@ -1004,7 +1043,7 @@
                                                     <td colSpan="2" className="px-6 py-4 print:py-2.5 print:px-4 font-bold text-amber-700 text-[12px] uppercase tracking-wider">
                                                         คะแนนงานเสริม
                                                     </td>
-                                                    {STAFF.map(staff => (
+                                                    {staffScores.map(staff => (
                                                         <td key={staff.id} className="px-6 py-4 print:py-2.5 print:px-4 text-center font-bold text-amber-600 print:text-amber-700">
                                                             {extraPoints[staff.id] !== 0 ? (extraPoints[staff.id] > 0 ? `+${extraPoints[staff.id]}` : extraPoints[staff.id]) : "-"}
                                                         </td>
@@ -1110,7 +1149,11 @@
                                                 <tr>
                                                     <th className="px-6 py-4 rounded-tl-lg">ประจำเดือน</th>
                                                     {STAFF.map(s => (
-                                                        <th key={s.id} className="px-6 py-4 text-center">{s.name} <span className="text-[11px] font-medium text-slate-500 block mt-0.5">({s.kpi} pt)</span></th>
+                                                        <th key={s.id} className="px-6 py-4 text-center">
+                                                            {s.name} 
+                                                            {s.endDate && <span className="text-[10px] text-rose-500 ml-1">(ลาออก)</span>}
+                                                            <span className="text-[11px] font-medium text-slate-500 block mt-0.5">({s.kpi} pt)</span>
+                                                        </th>
                                                     ))}
                                                     <th className="px-6 py-4 text-center rounded-tr-lg">จัดการ</th>
                                                 </tr>
@@ -1143,6 +1186,7 @@
                                                                 totalPoints += (mData.extraPoints?.[staff.id] || 0);
                                                                 
                                                                 const isGood = totalPoints >= staff.kpi;
+                                                                const isResignedInThisMonth = staff.endDate && monthKey > staff.endDate;
 
                                                                 return (
                                                                     <td key={staff.id} className={`px-6 py-4 text-center ${totalPoints > 0 ? (isGood ? 'text-emerald-600' : 'text-slate-600') : 'text-slate-300'}`}>
@@ -1155,7 +1199,9 @@
                                                                                     {totalMachines} เครื่อง
                                                                                 </span>
                                                                             </div>
-                                                                        ) : '-'}
+                                                                        ) : (
+                                                                            isResignedInThisMonth ? <span className="text-slate-200">-</span> : '-'
+                                                                        )}
                                                                     </td>
                                                                 );
                                                             })}
