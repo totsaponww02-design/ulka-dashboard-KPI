@@ -108,6 +108,9 @@
         const ActivityIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>;
         const ChevronDownIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 12 15 18 9"/></svg>;
         const CalendarIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+        const UsersIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+        const EditIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>;
+        const XIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
 
         // --- Custom Searchable Select Component (ดีไซน์ใหม่) ---
         const SearchableSelect = ({ options, value, onChange, placeholder = "ค้นหา...", containerClass, activeBgClass }) => {
@@ -254,20 +257,22 @@
 
         // --- กำหนดรายชื่อพนักงาน วันเสาร์ที่ทำงาน และ ตำแหน่งหน้าที่ ---
         // endDate: กำหนดเดือนที่ลาออก (รูปแบบ YYYY-MM) หากไม่มีแปลว่ายังทำงานอยู่
-        const STAFF = [
+        const DEFAULT_STAFF = [
             { id: 'nakrob', name: 'นักรบ', role: 'โมดิฟาย/แพ็ค', kpi: 156, satWork: [2, 4] },
             { id: 'amin', name: 'อามิน', role: 'โมดิฟาย', kpi: 312, satWork: [2, 4] },
             { id: 'guy', name: 'กาย', role: 'โมดิฟาย', kpi: 312, satWork: [1, 3] },
             { id: 'pman', name: 'พี่แมน', role: 'โมดิฟาย/แพ็ค', kpi: 156, satWork: [1, 3] },
-            { id: 'bom', name: 'บอม', role: 'โมดิฟาย', kpi: 312, satWork: [1, 3], endDate: '2026-03' } // เพิ่มคุณบอม และกำหนดให้สิ้นสุดงานเดือน 03
+            { id: 'bom', name: 'บอม', role: 'โมดิฟาย', kpi: 312, satWork: [1, 3], endDate: '2026-03-31' }
         ];
 
         const MODEL_OPTIONS = MODELS.map(m => ({ id: m.id, label: m.name, subLabel: `(+${m.points} pt)` }));
 
         // ฟังก์ชันคำนวณวันทำงานที่เหลือแบบออโต้รายบุคคล
         const calculateAutoDaysLeft = (monthStr, staff) => {
+            const staffEndMonth = staff.endDate ? staff.endDate.substring(0, 7) : null;
+
             // ถ้าระบบกำลังดูเดือนที่เขาลาออกไปแล้ว ให้วันเหลือ = 0
-            if (staff.endDate && monthStr > staff.endDate) return 0;
+            if (staffEndMonth && monthStr > staffEndMonth) return 0;
 
             const today = new Date();
             const currentY = today.getFullYear();
@@ -282,10 +287,22 @@
                 return 0; 
             }
 
-            const daysInMonth = new Date(targetY, targetM, 0).getDate();
+            let endDay = new Date(targetY, targetM, 0).getDate();
+
+            // ถ้าเป็นเดือนที่ลาออกพอดี และระบุวันที่ไว้ ให้สิ้นสุดการนับแค่วันที่ลาออก
+            if (staff.endDate && monthStr === staffEndMonth) {
+                const quitDay = parseInt(staff.endDate.split('-')[2], 10);
+                if (!isNaN(quitDay) && quitDay < endDay) {
+                    endDay = quitDay;
+                }
+            }
+
+            // ป้องกันกรณีเลยวันที่ลาออกไปแล้วในเดือนปัจจุบัน
+            if (startDay > endDay) return 0;
+
             let count = 0;
 
-            for (let d = startDay; d <= daysInMonth; d++) {
+            for (let d = startDay; d <= endDay; d++) {
                 const dateObj = new Date(targetY, targetM - 1, d);
                 const dayOfWeek = dateObj.getDay();
 
@@ -354,9 +371,18 @@
 
         function App() {
             const [db, setDb] = useState(getInitialDatabase);
+            const [staffList, setStaffList] = useState(() => {
+                const savedStaff = localStorage.getItem('modifyTeamStaff');
+                return savedStaff ? JSON.parse(savedStaff) : DEFAULT_STAFF;
+            });
             const [currentMonth, setCurrentMonth] = useState(getCurrentMonthStr()); 
             
             const [activeTab, setActiveTab] = useState('summary');
+
+            // --- Staff Modal States ---
+            const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
+            const [staffForm, setStaffForm] = useState({ id: '', name: '', role: 'โมดิฟาย', kpi: 312, satWork: [], endDate: '' });
+            const [staffError, setStaffError] = useState('');
 
             const currentMonthData = db[currentMonth] || { records: {}, extraPoints: {}, customDaysLeft: {}, logs: [] };
             const records = currentMonthData.records || {};
@@ -366,9 +392,11 @@
 
             // คำนวณหา "พนักงานที่ต้องแสดงผลในเดือนที่กำลังดูอยู่"
             const visibleStaff = useMemo(() => {
-                return STAFF.filter(staff => {
+                return staffList.filter(staff => {
+                    const staffEndMonth = staff.endDate ? staff.endDate.substring(0, 7) : null;
+                    
                     // กรณี 1: พนักงานยังไม่ลาออก หรือ เดือนที่กำลังดูอยู่น้อยกว่า/เท่ากับ เดือนที่เขาลาออก
-                    const isActiveInCurrentMonth = !staff.endDate || currentMonth <= staff.endDate;
+                    const isActiveInCurrentMonth = !staffEndMonth || currentMonth <= staffEndMonth;
                     
                     // กรณี 2: เผื่อมีข้อมูลคะแนนหลงอยู่ในเดือนที่เขาลาออกไปแล้ว (เช่น คีย์ย้อนหลัง) ก็ต้องแสดงชื่อเขาด้วยเพื่อไม่ให้ข้อมูลหาย
                     const hasRecords = records[staff.id] && Object.keys(records[staff.id]).length > 0;
@@ -376,12 +404,13 @@
                     
                     return isActiveInCurrentMonth || hasRecords || hasExtra;
                 });
-            }, [currentMonth, records, extraPoints]);
+            }, [currentMonth, records, extraPoints, staffList]);
 
             // สร้างตัวเลือกเฉพาะพนักงานที่แสดงผลได้
             const staffOptions = useMemo(() => {
                 return visibleStaff.map(s => {
-                    const isResigned = s.endDate && currentMonth > s.endDate;
+                    const staffEndMonth = s.endDate ? s.endDate.substring(0, 7) : null;
+                    const isResigned = staffEndMonth && currentMonth > staffEndMonth;
                     return { 
                         id: s.id, 
                         label: s.name, 
@@ -394,11 +423,11 @@
             const [recordDate, setRecordDate] = useState(getLocalDateStr());
             const [extraDate, setExtraDate] = useState(getLocalDateStr());
 
-            const [selectedStaff, setSelectedStaff] = useState(STAFF[0].id);
+            const [selectedStaff, setSelectedStaff] = useState(staffList[0]?.id || '');
             const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
             const [quantity, setQuantity] = useState(1);
 
-            const [selectedStaffExtra, setSelectedStaffExtra] = useState(STAFF[0].id);
+            const [selectedStaffExtra, setSelectedStaffExtra] = useState(staffList[0]?.id || '');
             const [extraPointInput, setExtraPointInput] = useState("");
             const [extraPointNote, setExtraPointNote] = useState("");
             
@@ -420,6 +449,56 @@
             useEffect(() => {
                 localStorage.setItem('modifyTeamData', JSON.stringify(db));
             }, [db]);
+
+            useEffect(() => {
+                localStorage.setItem('modifyTeamStaff', JSON.stringify(staffList));
+            }, [staffList]);
+
+            // --- ฟังก์ชันจัดการพนักงาน ---
+            const handleSaveStaff = () => {
+                if (!staffForm.name.trim() || !staffForm.role.trim() || staffForm.kpi <= 0) {
+                    setStaffError("กรุณากรอกข้อมูลชื่อ ตำแหน่ง และ KPI ให้ครบถ้วน");
+                    return;
+                }
+                setStaffError('');
+                
+                setStaffList(prev => {
+                    const formattedForm = {
+                        ...staffForm,
+                        endDate: staffForm.endDate || undefined
+                    };
+
+                    if (staffForm.id) {
+                        return prev.map(s => s.id === staffForm.id ? formattedForm : s);
+                    } else {
+                        const newId = 'staff_' + Date.now();
+                        return [...prev, { ...formattedForm, id: newId }];
+                    }
+                });
+                
+                setStaffForm({ id: '', name: '', role: 'โมดิฟาย', kpi: 312, satWork: [], endDate: '' });
+            };
+
+            const handleEditStaff = (staff) => {
+                setStaffForm({ ...staff, endDate: staff.endDate || '' });
+                setStaffError('');
+            };
+
+            const handleCancelEdit = () => {
+                setStaffForm({ id: '', name: '', role: 'โมดิฟาย', kpi: 312, satWork: [], endDate: '' });
+                setStaffError('');
+            };
+
+            const toggleSatWork = (weekNum) => {
+                setStaffForm(prev => {
+                    const current = prev.satWork || [];
+                    if (current.includes(weekNum)) {
+                        return { ...prev, satWork: current.filter(w => w !== weekNum) };
+                    } else {
+                        return { ...prev, satWork: [...current, weekNum].sort() };
+                    }
+                });
+            };
 
             // สำหรับ Custom Days เปลี่ยนแปลงตาม currentMonth ได้เลย
             const handleCustomDaysChange = (staffId, val) => {
@@ -653,6 +732,13 @@
                                 
                                 {/* Action Controls */}
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-shrink-0">
+                                    <button 
+                                        onClick={() => setIsStaffModalOpen(true)}
+                                        className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all w-full sm:w-auto bg-[#212c42] hover:bg-[#2a364f] text-white border border-[#344361] shadow-sm"
+                                    >
+                                        <UsersIcon className="w-4 h-4" />
+                                        จัดการพนักงาน
+                                    </button>
                                     <div className="flex items-center gap-2.5 bg-[#212c42] border border-[#344361] rounded-xl px-4 py-2.5 transition-colors focus-within:border-brand-500/60 shadow-inner">
                                         <CalendarIcon className="w-4 h-4 text-slate-400" />
                                         <span className="text-slate-400 text-sm font-medium">ประจำเดือน:</span>
@@ -1112,7 +1198,7 @@
                                                         <div className="space-y-2.5 pl-[3px]">
                                                             {logsForDate.map(log => {
                                                                 const timeStr = new Date(log.timestamp).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-                                                                const staff = STAFF.find(s => s.id === log.staffId)?.name || 'ไม่ทราบชื่อ';
+                                                                const staff = staffList.find(s => s.id === log.staffId)?.name || 'ไม่ทราบชื่อ';
                                                                 
                                                                 if (log.type === 'model') {
                                                                     const model = MODELS.find(m => m.id === log.modelId);
@@ -1175,7 +1261,7 @@
                                             <thead className="text-[14px] text-slate-800 font-bold bg-slate-100/80 border-b-2 border-slate-200">
                                                 <tr>
                                                     <th className="px-6 py-4 rounded-tl-lg">ประจำเดือน</th>
-                                                    {STAFF.map(s => (
+                                                    {staffList.map(s => (
                                                         <th key={s.id} className="px-6 py-4 text-center">
                                                             {s.name} 
                                                             {s.endDate && <span className="text-[10px] text-rose-500 ml-1">(ลาออก)</span>}
@@ -1199,7 +1285,7 @@
                                                                     {monthName}
                                                                 </div>
                                                             </td>
-                                                            {STAFF.map(staff => {
+                                                            {staffList.map(staff => {
                                                                 let totalPoints = 0;
                                                                 let totalMachines = 0;
                                                                 const pRecs = mData.records?.[staff.id] || {};
@@ -1213,7 +1299,8 @@
                                                                 totalPoints += (mData.extraPoints?.[staff.id] || 0);
                                                                 
                                                                 const isGood = totalPoints >= staff.kpi;
-                                                                const isResignedInThisMonth = staff.endDate && monthKey > staff.endDate;
+                                                                const staffEndMonth = staff.endDate ? staff.endDate.substring(0, 7) : null;
+                                                                const isResignedInThisMonth = staffEndMonth && monthKey > staffEndMonth;
 
                                                                 return (
                                                                     <td key={staff.id} className={`px-6 py-4 text-center ${totalPoints > 0 ? (isGood ? 'text-emerald-600' : 'text-slate-600') : 'text-slate-300'}`}>
@@ -1256,6 +1343,115 @@
                         {/* จบพื้นที่สำหรับ PDF */}
 
                     </div>
+
+                    {/* --- Modal จัดการพนักงาน --- */}
+                    {isStaffModalOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm print:hidden">
+                            <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-200">
+                                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                    <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                        <UsersIcon className="w-6 h-6 text-brand-600" />
+                                        จัดการข้อมูลพนักงาน
+                                    </h2>
+                                    <button onClick={() => setIsStaffModalOpen(false)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                                        <XIcon className="w-5 h-5 text-slate-500" />
+                                    </button>
+                                </div>
+                                
+                                <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+                                    {/* รายชื่อพนักงาน */}
+                                    <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col bg-white">
+                                        <div className="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 text-sm">รายชื่อทั้งหมด ({staffList.length})</div>
+                                        <div className="overflow-y-auto p-4 space-y-3 flex-1 hide-scrollbar">
+                                            {staffList.map(staff => (
+                                                <div key={staff.id} className="p-3 border border-slate-200 rounded-xl hover:border-brand-300 hover:shadow-sm transition-all flex justify-between items-start">
+                                                    <div>
+                                                        <div className="font-bold text-slate-800 flex items-center gap-2">
+                                                            {staff.name}
+                                                            {staff.endDate && <span className="px-2 py-0.5 text-[10px] bg-rose-100 text-rose-700 rounded-full font-bold">ลาออกแล้ว ({staff.endDate})</span>}
+                                                        </div>
+                                                        <div className="text-[12px] text-slate-500 mt-1">
+                                                            ตำแหน่ง: <span className="font-medium text-slate-700">{staff.role}</span> | KPI: <span className="font-medium text-brand-600">{staff.kpi}</span>
+                                                        </div>
+                                                        <div className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+                                                            <span>เข้าเสาร์ที่:</span> 
+                                                            {staff.satWork && staff.satWork.length > 0 ? (
+                                                                <div className="flex gap-1">
+                                                                    {staff.satWork.map(w => <span key={w} className="bg-slate-100 px-1.5 rounded">{w}</span>)}
+                                                                </div>
+                                                            ) : <span>-</span>}
+                                                        </div>
+                                                    </div>
+                                                    <button onClick={() => handleEditStaff(staff)} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
+                                                        <EditIcon className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    
+                                    {/* ฟอร์มเพิ่ม/แก้ไขพนักงาน */}
+                                    <div className="w-full md:w-1/2 p-6 overflow-y-auto bg-slate-50 hide-scrollbar flex flex-col">
+                                        <h3 className="font-bold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center justify-between">
+                                            <span>{staffForm.id ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่'}</span>
+                                            {staffForm.id && <button onClick={handleCancelEdit} className="text-[12px] text-brand-600 font-medium hover:underline">ยกเลิกการแก้ไข</button>}
+                                        </h3>
+                                        
+                                        {staffError && <div className="mb-4 p-3 bg-rose-50 text-rose-600 text-[13px] font-bold rounded-lg border border-rose-100">{staffError}</div>}
+
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-[13px] font-bold text-slate-600 mb-1.5">ชื่อพนักงาน *</label>
+                                                <input type="text" value={staffForm.name} onChange={e => setStaffForm({...staffForm, name: e.target.value})} className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none" placeholder="ระบุชื่อพนักงาน" />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-[13px] font-bold text-slate-600 mb-1.5">ตำแหน่ง *</label>
+                                                    <input type="text" value={staffForm.role} onChange={e => setStaffForm({...staffForm, role: e.target.value})} className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[13px] font-bold text-slate-600 mb-1.5">KPI ต่อเดือน *</label>
+                                                    <input type="number" value={staffForm.kpi} onChange={e => setStaffForm({...staffForm, kpi: Number(e.target.value)})} className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none" />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-[13px] font-bold text-slate-600 mb-1.5">วันเสาร์ที่ทำงาน <span className="font-normal text-slate-400">(สัปดาห์ที่)</span></label>
+                                                <div className="flex gap-2 flex-wrap">
+                                                    {[1, 2, 3, 4, 5].map(week => {
+                                                        const isSelected = staffForm.satWork && staffForm.satWork.includes(week);
+                                                        return (
+                                                            <button 
+                                                                key={week}
+                                                                onClick={() => toggleSatWork(week)}
+                                                                className={`w-10 h-10 rounded-lg text-sm font-bold border transition-all ${isSelected ? 'bg-brand-500 text-white border-brand-500 shadow-md' : 'bg-white text-slate-500 border-slate-300 hover:bg-slate-50'}`}
+                                                            >
+                                                                {week}
+                                                            </button>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </div>
+                                            <div className="pt-2 border-t border-slate-200 mt-2">
+                                                <label className="block text-[13px] font-bold text-slate-600 mb-1.5">วันที่ลาออก <span className="font-normal text-rose-400">(ถ้ามี)</span></label>
+                                                <input type="date" value={staffForm.endDate} onChange={e => setStaffForm({...staffForm, endDate: e.target.value})} className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-100 focus:border-rose-400 outline-none text-slate-700" />
+                                                <p className="text-[11px] text-slate-400 mt-1.5">หากระบุวันที่ลาออก ระบบจะหยุดคำนวณเป้าหมาย (KPI) หลังวันที่ระบุ</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-auto pt-6">
+                                            <button 
+                                                onClick={handleSaveStaff}
+                                                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl transition-colors shadow-sm"
+                                            >
+                                                {staffForm.id ? 'บันทึกการแก้ไข' : 'เพิ่มพนักงานใหม่'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             );
         }
