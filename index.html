@@ -14,8 +14,6 @@
     
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
     <script>
         tailwind.config = {
             theme: {
@@ -46,6 +44,7 @@
             background-color: #f8fafc; /* พื้นหลังสีเทาอ่อน สบายตา */
             color: #334155; 
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden; /* ป้องกันการล้นจอแนวนอน */
         }
         /* Custom Scrollbar ให้ดูมินิมอล */
         ::-webkit-scrollbar {
@@ -103,6 +102,7 @@
         const StarIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
         const CheckCircleIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
         const DownloadIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>;
+        const PrinterIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>;
         const HistoryIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>;
         const ListIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>;
         const ActivityIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>;
@@ -444,7 +444,6 @@
             const [extraPointInput, setExtraPointInput] = useState("");
             const [extraPointNote, setExtraPointNote] = useState("");
             
-            const [isDownloading, setIsDownloading] = useState(false);
             const [notification, setNotification] = useState(null);
 
             // เซ็ตค่าชื่อพนักงานเริ่มต้นใหม่ หากเปลี่ยนเดือนแล้วพนักงานที่เลือกไว้ก่อนหน้าถูกซ่อน
@@ -685,25 +684,13 @@
             };
 
             const handleDownloadPDF = () => {
+                // บังคับสลับไปหน้าสรุปผลก่อนพิมพ์
                 setActiveTab('summary');
                 
+                // ให้เวลา React เรนเดอร์หน้าตาราง แล้วเรียกหน้าต่าง Print ของเบราว์เซอร์
                 setTimeout(() => {
-                    setIsDownloading(true);
-                    const element = document.getElementById('printable-area');
-                    
-                    const opt = {
-                        margin:       [0.5, 0.5, 0.5, 0.5], 
-                        filename:     `Modify_Team_Dashboard_${currentMonth}.pdf`,
-                        image:        { type: 'jpeg', quality: 0.98 },
-                        html2canvas:  { scale: 2, useCORS: true },
-                        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-                        pagebreak:    { mode: ['css', 'legacy'] }
-                    };
-
-                    html2pdf().set(opt).from(element).save().then(() => {
-                        setIsDownloading(false);
-                    });
-                }, 100);
+                    window.print();
+                }, 300);
             };
 
             const staffScores = useMemo(() => {
@@ -753,11 +740,11 @@
             }, [logs]);
 
             return (
-                <div className="min-h-screen bg-slate-50/50 p-4 md:p-8 pb-20">
+                <div className="min-h-screen bg-slate-50/50 p-3 sm:p-4 md:p-8 pb-20 w-full overflow-x-hidden">
                     
                     {/* Header Section (Dark Theme UI) */}
-                    <div className="max-w-6xl mx-auto mb-8 print:hidden">
-                        <div className="relative bg-[#172033] rounded-[2rem] p-6 md:p-10 shadow-xl overflow-hidden border border-[#2a364f]">
+                    <div className="max-w-6xl mx-auto mb-6 sm:mb-8 print:hidden w-full">
+                        <div className="relative bg-[#172033] rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-6 md:p-10 shadow-xl overflow-hidden border border-[#2a364f] w-full">
                             
                             {/* Background Grid Pattern */}
                             <div 
@@ -771,72 +758,74 @@
                             {/* Background Glow Effect */}
                             <div className="absolute -top-32 -right-32 w-96 h-96 bg-brand-500/20 rounded-full blur-[80px] pointer-events-none"></div>
                             
-                            <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-                                <div className="flex-1">
+                            <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-5 sm:gap-8 w-full">
+                                <div className="flex-1 min-w-0">
                                     {/* Badge */}
-                                    <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#2a364f]/80 border border-[#3b4b6b] text-slate-300 text-[13px] font-medium mb-6 backdrop-blur-sm shadow-sm">
-                                        <ActivityIcon className="w-4 h-4 text-white" />
-                                        <span>พื้นที่แชร์ข้อมูลทีม</span>
+                                    <div className="inline-flex items-center gap-2.5 px-3 sm:px-4 py-1.5 rounded-full bg-[#2a364f]/80 border border-[#3b4b6b] text-slate-300 text-[12px] sm:text-[13px] font-medium mb-4 sm:mb-6 backdrop-blur-sm shadow-sm">
+                                        <ActivityIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0" />
+                                        <span className="truncate">พื้นที่แชร์ข้อมูลทีม</span>
                                     </div>
                                     
                                     {/* Title */}
-                                    <h1 className="text-3xl md:text-[42px] font-extrabold tracking-tight mb-3 leading-tight">
+                                    <h1 className="text-2xl sm:text-3xl md:text-[42px] font-extrabold tracking-tight mb-2 sm:mb-3 leading-tight break-words">
                                         <span className="text-white">MODIFY TEAM </span>
                                         <span className="text-[#a8c7fa]">DASHBOARD</span>
                                     </h1>
                                     
                                     {/* Subtitle */}
-                                    <p className="text-slate-400 text-sm md:text-[15px] font-medium max-w-2xl">
+                                    <p className="text-slate-400 text-[13px] sm:text-sm md:text-[15px] font-medium max-w-2xl leading-relaxed">
                                         ตรวจสอบยอดคะแนน รายละเอียดเครื่อง และประวัติการทำงานย้อนหลังแบบเรียลไทม์
                                     </p>
                                 </div>
                                 
                                 {/* Action Controls */}
-                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-shrink-0">
-                                    <button 
-                                        onClick={() => setIsModelModalOpen(true)}
-                                        className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all w-full sm:w-auto bg-[#212c42] hover:bg-[#2a364f] text-white border border-[#344361] shadow-sm"
-                                    >
-                                        <BoxIcon className="w-4 h-4" />
-                                        จัดการรุ่นเครื่อง
-                                    </button>
-                                    <button 
-                                        onClick={() => setIsStaffModalOpen(true)}
-                                        className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all w-full sm:w-auto bg-[#212c42] hover:bg-[#2a364f] text-white border border-[#344361] shadow-sm"
-                                    >
-                                        <UsersIcon className="w-4 h-4" />
-                                        จัดการพนักงาน
-                                    </button>
-                                    <div className="flex items-center gap-2.5 bg-[#212c42] border border-[#344361] rounded-xl px-4 py-2.5 transition-colors focus-within:border-brand-500/60 shadow-inner">
-                                        <CalendarIcon className="w-4 h-4 text-slate-400" />
-                                        <span className="text-slate-400 text-sm font-medium">ประจำเดือน:</span>
-                                        <input 
-                                            type="month" 
-                                            value={currentMonth}
-                                            onChange={(e) => setCurrentMonth(e.target.value)}
-                                            className="bg-transparent text-white font-semibold outline-none text-sm cursor-pointer"
-                                            style={{ colorScheme: 'dark' }}
-                                        />
+                                <div className="flex flex-col sm:flex-row flex-wrap items-start lg:items-center gap-3 flex-shrink-0 w-full lg:w-auto mt-2 lg:mt-0">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full sm:w-auto">
+                                        <button 
+                                            onClick={() => setIsModelModalOpen(true)}
+                                            className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-[13px] sm:text-sm transition-all w-full bg-[#212c42] hover:bg-[#2a364f] text-white border border-[#344361] shadow-sm"
+                                        >
+                                            <BoxIcon className="w-4 h-4 shrink-0" />
+                                            จัดการรุ่นเครื่อง
+                                        </button>
+                                        <button 
+                                            onClick={() => setIsStaffModalOpen(true)}
+                                            className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-[13px] sm:text-sm transition-all w-full bg-[#212c42] hover:bg-[#2a364f] text-white border border-[#344361] shadow-sm"
+                                        >
+                                            <UsersIcon className="w-4 h-4 shrink-0" />
+                                            จัดการพนักงาน
+                                        </button>
                                     </div>
-                                    
-                                    <button 
-                                        onClick={handleDownloadPDF}
-                                        disabled={isDownloading}
-                                        className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all w-full sm:w-auto
-                                            ${isDownloading ? 'bg-[#2a364f] text-slate-500 cursor-not-allowed border border-[#3b4b6b]' : 'bg-brand-600 hover:bg-brand-500 text-white border border-brand-500 shadow-[0_0_20px_rgba(37,99,235,0.25)] active:scale-[0.98]'}`}
-                                    >
-                                        <DownloadIcon className="w-4 h-4" />
-                                        {isDownloading ? 'กำลังสร้าง PDF...' : 'ดาวน์โหลดรายงาน PDF'}
-                                    </button>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full sm:w-auto">
+                                        <div className="flex items-center gap-2 bg-[#212c42] border border-[#344361] rounded-xl px-3 sm:px-4 py-2.5 transition-colors focus-within:border-brand-500/60 shadow-inner w-full">
+                                            <CalendarIcon className="w-4 h-4 text-slate-400 shrink-0" />
+                                            <span className="text-slate-400 text-[13px] sm:text-sm font-medium whitespace-nowrap shrink-0">ประจำเดือน:</span>
+                                            <input 
+                                                type="month" 
+                                                value={currentMonth}
+                                                onChange={(e) => setCurrentMonth(e.target.value)}
+                                                className="bg-transparent text-white font-semibold outline-none text-[13px] sm:text-sm cursor-pointer w-full min-w-0"
+                                                style={{ colorScheme: 'dark' }}
+                                            />
+                                        </div>
+                                        
+                                        <button 
+                                            onClick={handleDownloadPDF}
+                                            className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl font-bold text-[13px] sm:text-sm transition-all w-full bg-brand-600 hover:bg-brand-500 text-white border border-brand-500 shadow-[0_0_20px_rgba(37,99,235,0.25)] active:scale-[0.98]"
+                                        >
+                                            <PrinterIcon className="w-4 h-4 shrink-0" />
+                                            พิมพ์ / PDF
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 print:block print:max-w-none w-full">
                         
                         {/* เลนซ้าย: ฟอร์มเพิ่มข้อมูล */}
-                        <div className="lg:col-span-4 space-y-6">
+                        <div className="lg:col-span-4 space-y-6 print:hidden">
                             
                             {/* Card: บันทึกเครื่อง */}
                             <div className="bg-white rounded-2xl shadow-card p-6 relative transition-all">
@@ -996,7 +985,7 @@
                         </div>
 
                         {/* เลนขวา: Dashboard สรุปผล (พื้นที่สำหรับสร้าง PDF) */}
-                        <div className="lg:col-span-8 space-y-6" id="printable-area">
+                        <div className="lg:col-span-8 space-y-6 print:col-span-12 print:m-0" id="printable-area">
                             
                             {/* แสดงหัวข้อเฉพาะตอนจะปรินต์ PDF (หน้า 1) */}
                             <div className="hidden print:block mb-6">
@@ -1132,33 +1121,33 @@
                             </div>
 
                             {/* --- ตัวตัดหน้ากระดาษ (Page Break) สำหรับ PDF --- */}
-                            <div className="html2pdf__page-break"></div>
+                            <div className="hidden print:block" style={{ pageBreakBefore: 'always' }}></div>
 
                             {/* Data Table / History Tab Control (หน้า 2) */}
-                            <div className="bg-white rounded-2xl shadow-card overflow-hidden flex flex-col print-force-summary border border-slate-100 print:shadow-none print:border-none print:bg-transparent print:mt-4">
+                            <div className="bg-white rounded-2xl shadow-card overflow-hidden flex flex-col print-force-summary border border-slate-100 print:shadow-none print:border-none print:bg-transparent print:mt-0">
                                 
                                 {/* แถบเลือกโหมด (ซ่อนตอนปรินต์) */}
-                                <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-100 bg-white flex items-center justify-between gap-4 overflow-x-auto hide-scrollbar print:hidden">
-                                    <h2 className="font-bold text-[15px] sm:text-[16px] text-slate-800 flex items-center gap-2 whitespace-nowrap flex-shrink-0">
+                                <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-100 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 print:hidden">
+                                    <h2 className="font-bold text-[15px] sm:text-[16px] text-slate-800 flex items-center gap-2 w-full sm:w-auto">
                                         {activeTab === 'summary' ? <ListIcon className="w-4 h-4 text-slate-400" /> : activeTab === 'history' ? <ActivityIcon className="w-4 h-4 text-slate-400" /> : <CalendarIcon className="w-4 h-4 text-slate-400" />}
                                         {activeTab === 'summary' ? 'ตารางสรุปผลงาน' : activeTab === 'history' ? 'ประวัติการบันทึก' : 'ประวัติรายเดือน'}
                                     </h2>
-                                    <div className="flex bg-slate-50 p-1 rounded-lg border border-slate-100 gap-1 flex-shrink-0">
+                                    <div className="flex flex-wrap bg-slate-50 p-1 rounded-lg border border-slate-100 gap-1 w-full sm:w-auto">
                                         <button 
                                             onClick={() => setActiveTab('summary')}
-                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all whitespace-nowrap ${activeTab === 'summary' ? 'bg-white text-brand-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                                            className={`flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all whitespace-nowrap ${activeTab === 'summary' ? 'bg-white text-brand-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
                                         >
                                             <ListIcon className="w-3.5 h-3.5" /> สรุปยอด
                                         </button>
                                         <button 
                                             onClick={() => setActiveTab('history')}
-                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all whitespace-nowrap ${activeTab === 'history' ? 'bg-white text-brand-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                                            className={`flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all whitespace-nowrap ${activeTab === 'history' ? 'bg-white text-brand-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
                                         >
                                             <ActivityIcon className="w-3.5 h-3.5" /> ประวัติรายวัน
                                         </button>
                                         <button 
                                             onClick={() => setActiveTab('monthly')}
-                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all whitespace-nowrap ${activeTab === 'monthly' ? 'bg-white text-brand-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                                            className={`flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all whitespace-nowrap ${activeTab === 'monthly' ? 'bg-white text-brand-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
                                         >
                                             <CalendarIcon className="w-3.5 h-3.5" /> ประวัติรายเดือน
                                         </button>
@@ -1166,9 +1155,9 @@
                                 </div>
 
                                 {/* โซนแสดงเนื้อหา */}
-                                <div className="p-0">
+                                <div className="p-0 w-full overflow-hidden">
                                     {/* 1. โหมดตารางสรุปผล (แสดงเสมอตอนปรินต์) */}
-                                    <div className={`overflow-x-auto ${activeTab === 'summary' ? 'block' : 'hidden print:block'}`}>
+                                    <div className={`overflow-x-auto w-full ${activeTab === 'summary' ? 'block' : 'hidden print:block'}`}>
                                         <table className="w-full text-[13px] print:text-[11px] text-left whitespace-nowrap">
                                             <thead className="text-[14px] print:text-[12px] text-slate-800 font-bold bg-slate-100/80 border-b-2 border-slate-200 print:bg-slate-200/50">
                                                 <tr>
@@ -1247,7 +1236,7 @@
                                     </div>
 
                                     {/* 2. โหมดประวัติรายวัน (ซ่อนตอนปรินต์) */}
-                                    <div className={`${activeTab === 'history' ? 'block' : 'hidden'} print:hidden p-6 max-h-[600px] overflow-y-auto`}>
+                                    <div className={`${activeTab === 'history' ? 'block' : 'hidden'} print:hidden p-4 sm:p-6 max-h-[600px] overflow-y-auto w-full`}>
                                         {Object.keys(groupedLogs).length === 0 ? (
                                             <div className="text-center text-slate-400 py-16 flex flex-col items-center">
                                                 <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
@@ -1275,20 +1264,20 @@
                                                                     const pointEarned = model ? (log.amount * model.points) : 0;
 
                                                                     return (
-                                                                        <div key={log.id} className="bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm text-[13px] flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 hover:border-brand-100 transition-colors">
-                                                                            <div className="flex items-center gap-3.5">
+                                                                        <div key={log.id} className="bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm text-[13px] flex flex-col md:flex-row md:justify-between md:items-center gap-3 hover:border-brand-100 transition-colors w-full break-words">
+                                                                            <div className="flex items-center gap-3.5 flex-1 min-w-0">
                                                                                 <span className="text-[11px] text-slate-400 font-bold w-10 shrink-0">{timeStr}</span>
                                                                                 <span className={`flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-md ${isAdd ? 'bg-brand-50 text-brand-600' : 'bg-rose-50 text-rose-600'}`}>
                                                                                     {isAdd ? <PlusCircleIcon className="w-3.5 h-3.5"/> : <MinusCircleIcon className="w-3.5 h-3.5"/>}
                                                                                 </span>
-                                                                                <div className="flex flex-wrap items-center gap-1.5">
-                                                                                    <span className="font-bold text-slate-700">{staff}</span>
+                                                                                <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                                                                                    <span className="font-bold text-slate-700 truncate">{staff}</span>
                                                                                     <span className="text-slate-500">{isAdd ? 'บันทึก' : 'ลบ'}&nbsp;<strong className="text-slate-800">{modelName}</strong></span>
                                                                                 </div>
                                                                             </div>
-                                                                            <div className="font-bold text-slate-700 flex items-center gap-2 pl-12 sm:pl-0">
+                                                                            <div className="font-bold text-slate-700 flex flex-wrap items-center gap-2 pl-12 md:pl-0 flex-shrink-0">
                                                                                 {isAdd ? '+' : ''}{log.amount} <span className="text-[11px] text-slate-400 font-medium">เครื่อง</span>
-                                                                                <span className={`text-[11px] px-2 py-0.5 rounded-md border ${isAdd ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
+                                                                                <span className={`text-[11px] px-2 py-0.5 rounded-md border whitespace-nowrap ${isAdd ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
                                                                                     {isAdd ? '+' : ''}{pointEarned.toFixed(2)} pt
                                                                                 </span>
                                                                             </div>
@@ -1297,19 +1286,19 @@
                                                                 } else if (log.type === 'extra') {
                                                                     const isAdd = log.points > 0;
                                                                     return (
-                                                                        <div key={log.id} className="bg-amber-50/30 p-3.5 rounded-xl border border-amber-100/50 shadow-sm text-[13px] flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 hover:border-amber-200 transition-colors">
-                                                                            <div className="flex items-center gap-3.5">
+                                                                        <div key={log.id} className="bg-amber-50/30 p-3.5 rounded-xl border border-amber-100/50 shadow-sm text-[13px] flex flex-col md:flex-row md:justify-between md:items-center gap-3 hover:border-amber-200 transition-colors w-full break-words">
+                                                                            <div className="flex items-center gap-3.5 flex-1 min-w-0">
                                                                                 <span className="text-[11px] text-slate-400 font-bold w-10 shrink-0">{timeStr}</span>
                                                                                 <span className={`flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-md ${isAdd ? 'bg-amber-100 text-amber-600' : 'bg-rose-50 text-rose-600'}`}>
                                                                                     <StarIcon className="w-3.5 h-3.5"/>
                                                                                 </span>
-                                                                                <div className="flex flex-wrap items-center gap-1.5">
-                                                                                    <span className="font-bold text-slate-700">{staff}</span>
+                                                                                <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                                                                                    <span className="font-bold text-slate-700 truncate">{staff}</span>
                                                                                     <span className="text-amber-700 font-medium">บันทึกคะแนนเสริม</span>
-                                                                                    {log.note && <span className="text-[11px] bg-white text-slate-500 px-2 py-0.5 rounded border border-slate-200 ml-1">"{log.note}"</span>}
+                                                                                    {log.note && <span className="text-[11px] bg-white text-slate-500 px-2 py-0.5 rounded border border-slate-200 ml-1 break-words">"{log.note}"</span>}
                                                                                 </div>
                                                                             </div>
-                                                                            <div className="font-bold text-amber-600 pl-12 sm:pl-0">
+                                                                            <div className="font-bold text-amber-600 pl-12 md:pl-0 flex-shrink-0">
                                                                                 {isAdd ? '+' : ''}{log.points} <span className="text-[11px] text-amber-400 font-medium">pt</span>
                                                                             </div>
                                                                         </div>
@@ -1324,7 +1313,7 @@
                                     </div>
                                     
                                     {/* 3. โหมดสรุปรายเดือนย้อนหลัง (ซ่อนตอนปรินต์) */}
-                                    <div className={`${activeTab === 'monthly' ? 'block' : 'hidden'} print:hidden p-0 overflow-x-auto`}>
+                                    <div className={`${activeTab === 'monthly' ? 'block' : 'hidden'} print:hidden p-0 overflow-x-auto w-full`}>
                                         <table className="w-full text-[13px] text-left whitespace-nowrap">
                                             <thead className="text-[14px] text-slate-800 font-bold bg-slate-100/80 border-b-2 border-slate-200">
                                                 <tr>
@@ -1415,8 +1404,8 @@
                     {/* --- Modal จัดการพนักงาน --- */}
                     {isStaffModalOpen && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm print:hidden">
-                            <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-200">
-                                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] md:max-h-[85vh] overflow-hidden border border-slate-200">
+                                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 flex-shrink-0">
                                     <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                                         <UsersIcon className="w-6 h-6 text-brand-600" />
                                         จัดการข้อมูลพนักงาน
@@ -1426,11 +1415,11 @@
                                     </button>
                                 </div>
                                 
-                                <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+                                <div className="flex flex-col md:flex-row flex-1 overflow-y-auto md:overflow-hidden">
                                     {/* รายชื่อพนักงาน */}
-                                    <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col bg-white">
-                                        <div className="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 text-sm">รายชื่อทั้งหมด ({staffList.length})</div>
-                                        <div className="overflow-y-auto p-4 space-y-3 flex-1 hide-scrollbar">
+                                    <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col bg-white h-auto md:h-full">
+                                        <div className="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 text-sm flex-shrink-0">รายชื่อทั้งหมด ({staffList.length})</div>
+                                        <div className="overflow-y-visible md:overflow-y-auto p-4 space-y-3 flex-1 hide-scrollbar">
                                             {staffList.map(staff => (
                                                 <div key={staff.id} className="p-3 border border-slate-200 rounded-xl hover:border-brand-300 hover:shadow-sm transition-all flex justify-between items-start">
                                                     <div>
@@ -1459,8 +1448,8 @@
                                     </div>
                                     
                                     {/* ฟอร์มเพิ่ม/แก้ไขพนักงาน */}
-                                    <div className="w-full md:w-1/2 p-6 overflow-y-auto bg-slate-50 hide-scrollbar flex flex-col">
-                                        <h3 className="font-bold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center justify-between">
+                                    <div className="w-full md:w-1/2 p-6 overflow-y-visible md:overflow-y-auto bg-slate-50 hide-scrollbar flex flex-col h-auto md:h-full">
+                                        <h3 className="font-bold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
                                             <span>{staffForm.id ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่'}</span>
                                             {staffForm.id && <button onClick={handleCancelEdit} className="text-[12px] text-brand-600 font-medium hover:underline">ยกเลิกการแก้ไข</button>}
                                         </h3>
@@ -1523,8 +1512,8 @@
                     {/* --- Modal จัดการรุ่นเครื่อง --- */}
                     {isModelModalOpen && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm print:hidden">
-                            <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-200">
-                                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] md:max-h-[85vh] overflow-hidden border border-slate-200">
+                                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 flex-shrink-0">
                                     <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                                         <BoxIcon className="w-6 h-6 text-brand-600" />
                                         จัดการข้อมูลรุ่นเครื่อง
@@ -1534,11 +1523,11 @@
                                     </button>
                                 </div>
                                 
-                                <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+                                <div className="flex flex-col md:flex-row flex-1 overflow-y-auto md:overflow-hidden">
                                     {/* รายการรุ่นเครื่อง */}
-                                    <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col bg-white">
-                                        <div className="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 text-sm">รายชื่อรุ่นเครื่องทั้งหมด ({modelList.length})</div>
-                                        <div className="overflow-y-auto p-4 space-y-3 flex-1 hide-scrollbar">
+                                    <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col bg-white h-auto md:h-full">
+                                        <div className="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 text-sm flex-shrink-0">รายชื่อรุ่นเครื่องทั้งหมด ({modelList.length})</div>
+                                        <div className="overflow-y-visible md:overflow-y-auto p-4 space-y-3 flex-1 hide-scrollbar">
                                             {modelList.map(model => (
                                                 <div key={model.id} className="p-3 border border-slate-200 rounded-xl hover:border-brand-300 hover:shadow-sm transition-all flex justify-between items-center group">
                                                     <div>
@@ -1560,8 +1549,8 @@
                                     </div>
                                     
                                     {/* ฟอร์มเพิ่ม/แก้ไขรุ่นเครื่อง */}
-                                    <div className="w-full md:w-1/2 p-6 overflow-y-auto bg-slate-50 hide-scrollbar flex flex-col">
-                                        <h3 className="font-bold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center justify-between">
+                                    <div className="w-full md:w-1/2 p-6 overflow-y-visible md:overflow-y-auto bg-slate-50 hide-scrollbar flex flex-col h-auto md:h-full">
+                                        <h3 className="font-bold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
                                             <span>{isEditingModel ? 'แก้ไขข้อมูลรุ่นเครื่อง' : 'เพิ่มรุ่นเครื่องใหม่'}</span>
                                             {isEditingModel && <button onClick={handleCancelEditModel} className="text-[12px] text-brand-600 font-medium hover:underline">ยกเลิกการแก้ไข</button>}
                                         </h3>
@@ -1627,7 +1616,52 @@
     
     <style>
         @media print {
-            .hidden.print\:block { display: block !important; }
+            /* ตั้งค่าให้หน้ากระดาษเป็นแนวนอน (Landscape) และกำหนดระยะขอบ */
+            @page { 
+                size: landscape; 
+                margin: 1cm; 
+            }
+
+            body { 
+                background-color: white !important; 
+                color: black !important;
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+            }
+
+            /* เคลียร์ระยะห่างและ Background สีเทาออกให้หมดเวลาปรินต์ */
+            #root, .min-h-screen { 
+                padding: 0 !important; 
+                margin: 0 !important; 
+                background: white !important;
+                min-height: auto !important;
+            }
+
+            .max-w-6xl { max-width: none !important; }
+
+            /* บังคับคลาสของ Tailwind ให้ทำงานตอน Print */
+            .print\:hidden { display: none !important; }
+            .print\:block { display: block !important; }
+            .print\:shadow-none { box-shadow: none !important; }
+            .print\:border-none { border: none !important; }
+            .print\:bg-transparent { background-color: transparent !important; }
+            .print\:m-0 { margin: 0 !important; }
+            .print\:mt-0 { margin-top: 0 !important; }
+
+            /* ป้องกันไม่ให้ตารางหรือการ์ดโดนตัดขาดครึ่งบรรทัดเวลาขึ้นหน้าใหม่ */
+            tr, .shadow-card { 
+                page-break-inside: avoid !important; 
+                break-inside: avoid !important; 
+            }
+            
+            thead { display: table-header-group; }
+            tfoot { display: table-footer-group; }
+
+            /* บังคับให้พิมพ์สีพื้นหลังของตารางและการ์ด (เช่น สีเขียว ทะลุเป้า) */
+            * { 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+            }
         }
     </style>
 </body>
