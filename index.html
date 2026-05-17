@@ -1404,10 +1404,10 @@
                     {/* --- Modal จัดการพนักงาน --- */}
                     {isStaffModalOpen && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm print:hidden">
-                            <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] md:max-h-[85vh] overflow-hidden border border-slate-200">
-                                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 flex-shrink-0">
-                                    <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                        <UsersIcon className="w-6 h-6 text-brand-600" />
+                            <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col h-[90vh] md:h-[85vh] overflow-hidden border border-slate-200">
+                                <div className="px-5 py-4 sm:px-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 flex-shrink-0">
+                                    <h2 className="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2">
+                                        <UsersIcon className="w-5 h-5 sm:w-6 sm:h-6 text-brand-600" />
                                         จัดการข้อมูลพนักงาน
                                     </h2>
                                     <button onClick={() => setIsStaffModalOpen(false)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
@@ -1415,11 +1415,11 @@
                                     </button>
                                 </div>
                                 
-                                <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-y-auto md:overflow-hidden">
+                                <div className="flex flex-col md:flex-row flex-1 overflow-hidden min-h-0">
                                     {/* รายชื่อพนักงาน */}
-                                    <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col bg-white flex-shrink-0 md:h-full">
-                                        <div className="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 text-sm flex-shrink-0">รายชื่อทั้งหมด ({staffList.length})</div>
-                                        <div className="overflow-y-auto max-h-[45vh] md:max-h-none md:flex-1 p-4 space-y-3 hide-scrollbar min-h-0">
+                                    <div className="w-full md:w-1/2 h-[45%] md:h-full flex flex-col bg-white border-b md:border-b-0 md:border-r border-slate-100">
+                                        <div className="p-3 sm:p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 text-sm flex-shrink-0">รายชื่อทั้งหมด ({staffList.length})</div>
+                                        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0">
                                             {staffList.map(staff => (
                                                 <div key={staff.id} className="p-3 border border-slate-200 rounded-xl hover:border-brand-300 hover:shadow-sm transition-all flex justify-between items-start">
                                                     <div>
@@ -1448,60 +1448,62 @@
                                     </div>
                                     
                                     {/* ฟอร์มเพิ่ม/แก้ไขพนักงาน */}
-                                    <div className="w-full md:w-1/2 p-6 bg-slate-50 hide-scrollbar flex flex-col flex-shrink-0 md:h-full md:overflow-y-auto min-h-0">
-                                        <h3 className="font-bold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
-                                            <span>{staffForm.id ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่'}</span>
-                                            {staffForm.id && <button onClick={handleCancelEdit} className="text-[12px] text-brand-600 font-medium hover:underline">ยกเลิกการแก้ไข</button>}
-                                        </h3>
-                                        
-                                        {staffError && <div className="mb-4 p-3 bg-rose-50 text-rose-600 text-[13px] font-bold rounded-lg border border-rose-100">{staffError}</div>}
+                                    <div className="w-full md:w-1/2 h-[55%] md:h-full flex flex-col bg-slate-50">
+                                        <div className="flex-1 overflow-y-auto p-4 sm:p-6 min-h-0 flex flex-col">
+                                            <h3 className="font-bold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
+                                                <span>{staffForm.id ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่'}</span>
+                                                {staffForm.id && <button onClick={handleCancelEdit} className="text-[12px] text-brand-600 font-medium hover:underline">ยกเลิกการแก้ไข</button>}
+                                            </h3>
+                                            
+                                            {staffError && <div className="mb-4 p-3 bg-rose-50 text-rose-600 text-[13px] font-bold rounded-lg border border-rose-100 flex-shrink-0">{staffError}</div>}
 
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="block text-[13px] font-bold text-slate-600 mb-1.5">ชื่อพนักงาน *</label>
-                                                <input type="text" value={staffForm.name} onChange={e => setStaffForm({...staffForm, name: e.target.value})} className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none" placeholder="ระบุชื่อพนักงาน" />
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-3">
+                                            <div className="space-y-4">
                                                 <div>
-                                                    <label className="block text-[13px] font-bold text-slate-600 mb-1.5">ตำแหน่ง *</label>
-                                                    <input type="text" value={staffForm.role} onChange={e => setStaffForm({...staffForm, role: e.target.value})} className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none" />
+                                                    <label className="block text-[13px] font-bold text-slate-600 mb-1.5">ชื่อพนักงาน *</label>
+                                                    <input type="text" value={staffForm.name} onChange={e => setStaffForm({...staffForm, name: e.target.value})} className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none" placeholder="ระบุชื่อพนักงาน" />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div>
+                                                        <label className="block text-[13px] font-bold text-slate-600 mb-1.5">ตำแหน่ง *</label>
+                                                        <input type="text" value={staffForm.role} onChange={e => setStaffForm({...staffForm, role: e.target.value})} className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[13px] font-bold text-slate-600 mb-1.5">KPI ต่อเดือน *</label>
+                                                        <input type="number" value={staffForm.kpi} onChange={e => setStaffForm({...staffForm, kpi: Number(e.target.value)})} className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none" />
+                                                    </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[13px] font-bold text-slate-600 mb-1.5">KPI ต่อเดือน *</label>
-                                                    <input type="number" value={staffForm.kpi} onChange={e => setStaffForm({...staffForm, kpi: Number(e.target.value)})} className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none" />
+                                                    <label className="block text-[13px] font-bold text-slate-600 mb-1.5">วันเสาร์ที่ทำงาน <span className="font-normal text-slate-400">(สัปดาห์ที่)</span></label>
+                                                    <div className="flex gap-2 flex-wrap">
+                                                        {[1, 2, 3, 4, 5].map(week => {
+                                                            const isSelected = staffForm.satWork && staffForm.satWork.includes(week);
+                                                            return (
+                                                                <button 
+                                                                    key={week}
+                                                                    onClick={() => toggleSatWork(week)}
+                                                                    className={`w-10 h-10 rounded-lg text-sm font-bold border transition-all flex-shrink-0 ${isSelected ? 'bg-brand-500 text-white border-brand-500 shadow-md' : 'bg-white text-slate-500 border-slate-300 hover:bg-slate-50'}`}
+                                                                >
+                                                                    {week}
+                                                                </button>
+                                                            )
+                                                        })}
+                                                    </div>
+                                                </div>
+                                                <div className="pt-2 border-t border-slate-200 mt-2">
+                                                    <label className="block text-[13px] font-bold text-slate-600 mb-1.5">วันที่ลาออก <span className="font-normal text-rose-400">(ถ้ามี)</span></label>
+                                                    <input type="date" value={staffForm.endDate} onChange={e => setStaffForm({...staffForm, endDate: e.target.value})} className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-100 focus:border-rose-400 outline-none text-slate-700" />
+                                                    <p className="text-[11px] text-slate-400 mt-1.5">หากระบุวันที่ลาออก ระบบจะหยุดคำนวณเป้าหมาย (KPI) หลังวันที่ระบุ</p>
                                                 </div>
                                             </div>
-                                            <div>
-                                                <label className="block text-[13px] font-bold text-slate-600 mb-1.5">วันเสาร์ที่ทำงาน <span className="font-normal text-slate-400">(สัปดาห์ที่)</span></label>
-                                                <div className="flex gap-2 flex-wrap">
-                                                    {[1, 2, 3, 4, 5].map(week => {
-                                                        const isSelected = staffForm.satWork && staffForm.satWork.includes(week);
-                                                        return (
-                                                            <button 
-                                                                key={week}
-                                                                onClick={() => toggleSatWork(week)}
-                                                                className={`w-10 h-10 rounded-lg text-sm font-bold border transition-all ${isSelected ? 'bg-brand-500 text-white border-brand-500 shadow-md' : 'bg-white text-slate-500 border-slate-300 hover:bg-slate-50'}`}
-                                                            >
-                                                                {week}
-                                                            </button>
-                                                        )
-                                                    })}
-                                                </div>
-                                            </div>
-                                            <div className="pt-2 border-t border-slate-200 mt-2">
-                                                <label className="block text-[13px] font-bold text-slate-600 mb-1.5">วันที่ลาออก <span className="font-normal text-rose-400">(ถ้ามี)</span></label>
-                                                <input type="date" value={staffForm.endDate} onChange={e => setStaffForm({...staffForm, endDate: e.target.value})} className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-100 focus:border-rose-400 outline-none text-slate-700" />
-                                                <p className="text-[11px] text-slate-400 mt-1.5">หากระบุวันที่ลาออก ระบบจะหยุดคำนวณเป้าหมาย (KPI) หลังวันที่ระบุ</p>
-                                            </div>
-                                        </div>
 
-                                        <div className="mt-auto pt-6">
-                                            <button 
-                                                onClick={handleSaveStaff}
-                                                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl transition-colors shadow-sm"
-                                            >
-                                                {staffForm.id ? 'บันทึกการแก้ไข' : 'เพิ่มพนักงานใหม่'}
-                                            </button>
+                                            <div className="mt-auto pt-6 flex-shrink-0">
+                                                <button 
+                                                    onClick={handleSaveStaff}
+                                                    className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl transition-colors shadow-sm"
+                                                >
+                                                    {staffForm.id ? 'บันทึกการแก้ไข' : 'เพิ่มพนักงานใหม่'}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1512,10 +1514,10 @@
                     {/* --- Modal จัดการรุ่นเครื่อง --- */}
                     {isModelModalOpen && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm print:hidden">
-                            <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] md:max-h-[85vh] overflow-hidden border border-slate-200">
-                                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 flex-shrink-0">
-                                    <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                        <BoxIcon className="w-6 h-6 text-brand-600" />
+                            <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col h-[90vh] md:h-[85vh] overflow-hidden border border-slate-200">
+                                <div className="px-5 py-4 sm:px-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 flex-shrink-0">
+                                    <h2 className="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2">
+                                        <BoxIcon className="w-5 h-5 sm:w-6 sm:h-6 text-brand-600" />
                                         จัดการข้อมูลรุ่นเครื่อง
                                     </h2>
                                     <button onClick={() => setIsModelModalOpen(false)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
@@ -1523,11 +1525,11 @@
                                     </button>
                                 </div>
                                 
-                                <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-y-auto md:overflow-hidden">
+                                <div className="flex flex-col md:flex-row flex-1 overflow-hidden min-h-0">
                                     {/* รายการรุ่นเครื่อง */}
-                                    <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col bg-white flex-shrink-0 md:h-full">
-                                        <div className="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 text-sm flex-shrink-0">รายชื่อรุ่นเครื่องทั้งหมด ({modelList.length})</div>
-                                        <div className="overflow-y-auto max-h-[45vh] md:max-h-none md:flex-1 p-4 space-y-3 hide-scrollbar min-h-0">
+                                    <div className="w-full md:w-1/2 h-[45%] md:h-full flex flex-col bg-white border-b md:border-b-0 md:border-r border-slate-100">
+                                        <div className="p-3 sm:p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 text-sm flex-shrink-0">รายชื่อรุ่นเครื่องทั้งหมด ({modelList.length})</div>
+                                        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-0">
                                             {modelList.map(model => (
                                                 <div key={model.id} className="p-3 border border-slate-200 rounded-xl hover:border-brand-300 hover:shadow-sm transition-all flex justify-between items-center group">
                                                     <div>
@@ -1549,56 +1551,58 @@
                                     </div>
                                     
                                     {/* ฟอร์มเพิ่ม/แก้ไขรุ่นเครื่อง */}
-                                    <div className="w-full md:w-1/2 p-6 bg-slate-50 hide-scrollbar flex flex-col flex-shrink-0 md:h-full md:overflow-y-auto min-h-0">
-                                        <h3 className="font-bold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
-                                            <span>{isEditingModel ? 'แก้ไขข้อมูลรุ่นเครื่อง' : 'เพิ่มรุ่นเครื่องใหม่'}</span>
-                                            {isEditingModel && <button onClick={handleCancelEditModel} className="text-[12px] text-brand-600 font-medium hover:underline">ยกเลิกการแก้ไข</button>}
-                                        </h3>
-                                        
-                                        {modelError && <div className="mb-4 p-3 bg-rose-50 text-rose-600 text-[13px] font-bold rounded-lg border border-rose-100">{modelError}</div>}
+                                    <div className="w-full md:w-1/2 h-[55%] md:h-full flex flex-col bg-slate-50">
+                                        <div className="flex-1 overflow-y-auto p-4 sm:p-6 min-h-0 flex flex-col">
+                                            <h3 className="font-bold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
+                                                <span>{isEditingModel ? 'แก้ไขข้อมูลรุ่นเครื่อง' : 'เพิ่มรุ่นเครื่องใหม่'}</span>
+                                                {isEditingModel && <button onClick={handleCancelEditModel} className="text-[12px] text-brand-600 font-medium hover:underline">ยกเลิกการแก้ไข</button>}
+                                            </h3>
+                                            
+                                            {modelError && <div className="mb-4 p-3 bg-rose-50 text-rose-600 text-[13px] font-bold rounded-lg border border-rose-100 flex-shrink-0">{modelError}</div>}
 
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="block text-[13px] font-bold text-slate-600 mb-1.5">รหัสเครื่อง (ID) *</label>
-                                                <input 
-                                                    type="text" 
-                                                    value={modelForm.id} 
-                                                    onChange={e => setModelForm({...modelForm, id: e.target.value})} 
-                                                    className={`w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none ${isEditingModel ? 'bg-slate-200 text-slate-500 cursor-not-allowed' : 'bg-white'}`} 
-                                                    placeholder="เช่น CABIN-NEW" 
-                                                    disabled={isEditingModel}
-                                                />
-                                                <p className="text-[11px] text-slate-400 mt-1">ใช้สำหรับอ้างอิงในระบบ (แก้ไขไม่ได้หลังจากสร้างแล้วเพื่อป้องกันข้อมูลเดิมสูญหาย)</p>
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <label className="block text-[13px] font-bold text-slate-600 mb-1.5">รหัสเครื่อง (ID) *</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={modelForm.id} 
+                                                        onChange={e => setModelForm({...modelForm, id: e.target.value})} 
+                                                        className={`w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none ${isEditingModel ? 'bg-slate-200 text-slate-500 cursor-not-allowed' : 'bg-white'}`} 
+                                                        placeholder="เช่น CABIN-NEW" 
+                                                        disabled={isEditingModel}
+                                                    />
+                                                    <p className="text-[11px] text-slate-400 mt-1">ใช้สำหรับอ้างอิงในระบบ (แก้ไขไม่ได้หลังจากสร้างแล้วเพื่อป้องกันข้อมูลเดิมสูญหาย)</p>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[13px] font-bold text-slate-600 mb-1.5">ชื่อรุ่นที่แสดงผล *</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={modelForm.name} 
+                                                        onChange={e => setModelForm({...modelForm, name: e.target.value})} 
+                                                        className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none" 
+                                                        placeholder="เช่น CABIN V.2" 
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[13px] font-bold text-slate-600 mb-1.5">คะแนนต่อเครื่อง *</label>
+                                                    <input 
+                                                        type="number" 
+                                                        step="0.01"
+                                                        value={modelForm.points} 
+                                                        onChange={e => setModelForm({...modelForm, points: e.target.value})} 
+                                                        className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none" 
+                                                    />
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label className="block text-[13px] font-bold text-slate-600 mb-1.5">ชื่อรุ่นที่แสดงผล *</label>
-                                                <input 
-                                                    type="text" 
-                                                    value={modelForm.name} 
-                                                    onChange={e => setModelForm({...modelForm, name: e.target.value})} 
-                                                    className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none" 
-                                                    placeholder="เช่น CABIN V.2" 
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-[13px] font-bold text-slate-600 mb-1.5">คะแนนต่อเครื่อง *</label>
-                                                <input 
-                                                    type="number" 
-                                                    step="0.01"
-                                                    value={modelForm.points} 
-                                                    onChange={e => setModelForm({...modelForm, points: e.target.value})} 
-                                                    className="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none" 
-                                                />
-                                            </div>
-                                        </div>
 
-                                        <div className="mt-auto pt-6">
-                                            <button 
-                                                onClick={handleSaveModel}
-                                                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl transition-colors shadow-sm"
-                                            >
-                                                {isEditingModel ? 'บันทึกการแก้ไข' : 'เพิ่มรุ่นเครื่องใหม่'}
-                                            </button>
+                                            <div className="mt-auto pt-6 flex-shrink-0">
+                                                <button 
+                                                    onClick={handleSaveModel}
+                                                    className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl transition-colors shadow-sm"
+                                                >
+                                                    {isEditingModel ? 'บันทึกการแก้ไข' : 'เพิ่มรุ่นเครื่องใหม่'}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
