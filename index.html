@@ -1415,11 +1415,11 @@
                                     </button>
                                 </div>
                                 
-                                <div className="flex flex-col md:flex-row flex-1 overflow-y-auto md:overflow-hidden">
+                                <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-y-auto md:overflow-hidden">
                                     {/* รายชื่อพนักงาน */}
-                                    <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col bg-white h-auto md:h-full">
+                                    <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col bg-white flex-shrink-0 md:h-full">
                                         <div className="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 text-sm flex-shrink-0">รายชื่อทั้งหมด ({staffList.length})</div>
-                                        <div className="overflow-y-visible md:overflow-y-auto p-4 space-y-3 flex-1 hide-scrollbar">
+                                        <div className="overflow-y-auto max-h-[45vh] md:max-h-none md:flex-1 p-4 space-y-3 hide-scrollbar min-h-0">
                                             {staffList.map(staff => (
                                                 <div key={staff.id} className="p-3 border border-slate-200 rounded-xl hover:border-brand-300 hover:shadow-sm transition-all flex justify-between items-start">
                                                     <div>
@@ -1448,7 +1448,7 @@
                                     </div>
                                     
                                     {/* ฟอร์มเพิ่ม/แก้ไขพนักงาน */}
-                                    <div className="w-full md:w-1/2 p-6 overflow-y-visible md:overflow-y-auto bg-slate-50 hide-scrollbar flex flex-col h-auto md:h-full">
+                                    <div className="w-full md:w-1/2 p-6 bg-slate-50 hide-scrollbar flex flex-col flex-shrink-0 md:h-full md:overflow-y-auto min-h-0">
                                         <h3 className="font-bold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
                                             <span>{staffForm.id ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่'}</span>
                                             {staffForm.id && <button onClick={handleCancelEdit} className="text-[12px] text-brand-600 font-medium hover:underline">ยกเลิกการแก้ไข</button>}
@@ -1523,11 +1523,11 @@
                                     </button>
                                 </div>
                                 
-                                <div className="flex flex-col md:flex-row flex-1 overflow-y-auto md:overflow-hidden">
+                                <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-y-auto md:overflow-hidden">
                                     {/* รายการรุ่นเครื่อง */}
-                                    <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col bg-white h-auto md:h-full">
+                                    <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col bg-white flex-shrink-0 md:h-full">
                                         <div className="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 text-sm flex-shrink-0">รายชื่อรุ่นเครื่องทั้งหมด ({modelList.length})</div>
-                                        <div className="overflow-y-visible md:overflow-y-auto p-4 space-y-3 flex-1 hide-scrollbar">
+                                        <div className="overflow-y-auto max-h-[45vh] md:max-h-none md:flex-1 p-4 space-y-3 hide-scrollbar min-h-0">
                                             {modelList.map(model => (
                                                 <div key={model.id} className="p-3 border border-slate-200 rounded-xl hover:border-brand-300 hover:shadow-sm transition-all flex justify-between items-center group">
                                                     <div>
@@ -1549,7 +1549,7 @@
                                     </div>
                                     
                                     {/* ฟอร์มเพิ่ม/แก้ไขรุ่นเครื่อง */}
-                                    <div className="w-full md:w-1/2 p-6 overflow-y-visible md:overflow-y-auto bg-slate-50 hide-scrollbar flex flex-col h-auto md:h-full">
+                                    <div className="w-full md:w-1/2 p-6 bg-slate-50 hide-scrollbar flex flex-col flex-shrink-0 md:h-full md:overflow-y-auto min-h-0">
                                         <h3 className="font-bold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center justify-between flex-shrink-0">
                                             <span>{isEditingModel ? 'แก้ไขข้อมูลรุ่นเครื่อง' : 'เพิ่มรุ่นเครื่องใหม่'}</span>
                                             {isEditingModel && <button onClick={handleCancelEditModel} className="text-[12px] text-brand-600 font-medium hover:underline">ยกเลิกการแก้ไข</button>}
